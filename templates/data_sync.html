@@ -423,9 +423,33 @@
         </div>
     </div>
 
-    <a href="/" class="back-btn">← Return to Neural Interface</a>
+    <a href="/" class="back-btn">← Return to Neural Interface</a>    <script>
+        // Enhanced notification system instead of alerts
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#ff4444' : (type === 'success' ? '#00ff00' : '#0088ff')};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                font-family: 'Orbitron', monospace;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
 
-    <script>
         function startSync() {
             const status = document.getElementById('syncStatus');
             const progress = document.getElementById('syncProgress');
@@ -488,9 +512,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Neural configuration updated successfully');
+                    showNotification('Neural configuration updated successfully', 'success');
                 } else {
-                    alert('Error updating neural settings');
+                    showNotification('Error updating neural settings', 'error');
                 }
             });
         });

@@ -13,6 +13,25 @@ import speech_recognition as sr
 import pyttsx3
 import threading
 import time
+import sys
+
+# Suppress Windows error dialogs for audio issues
+if sys.platform == "win32":
+    try:
+        import ctypes
+        from ctypes import wintypes
+        
+        # Disable Windows Error Reporting dialogs
+        SEM_FAILCRITICALERRORS = 0x0001
+        SEM_NOOPENFILEERRORBOX = 0x8000
+        
+        ctypes.windll.kernel32.SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX)
+        
+        # Also suppress console error dialogs
+        os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+        os.environ["PYTHONIOENCODING"] = "utf-8"
+    except Exception as e:
+        pass  # Ignore if this fails
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +50,26 @@ class AudioProcessor:
         # Voice control to prevent overlapping speech
         self.is_speaking = False
         self.speech_lock = threading.Lock()
-        
-        # Check for FFmpeg
+          # Check for FFmpeg
         self.ffmpeg_available = self._check_ffmpeg()
     
     def _init_tts(self):
         """Initialize text-to-speech engine with masculine voice settings"""
         try:
-            self.tts_engine = pyttsx3.init()
+            # Initialize with proper error handling to prevent Windows popups
+            import sys
+            if sys.platform == "win32":
+                # Suppress Windows error reporting dialogs
+                import os
+                os.environ["PYTHONHTTPSVERIFY"] = "0"
+            
+            self.tts_engine = pyttsx3.init(driverName='sapi5' if sys.platform == "win32" else None)
+            
+            # Test if engine is functional before proceeding
+            test_voices = self.tts_engine.getProperty('voices')
+            if not test_voices:
+                raise Exception("No TTS voices available")
+            
             self.tts_engine.setProperty('rate', 140)  # Slower for deeper masculine tone
             self.tts_engine.setProperty('volume', 1.0)  # Full volume for authority
             
@@ -54,7 +85,7 @@ class AudioProcessor:
                 selected_voice = None
                 for preference in voice_preferences:
                     for voice in voices:
-                        if preference in voice.name.lower():
+                        if voice and hasattr(voice, 'name') and preference in voice.name.lower():
                             selected_voice = voice
                             break
                     if selected_voice:
@@ -67,18 +98,24 @@ class AudioProcessor:
                 else:
                     # Fallback: try to avoid obviously female voices
                     for voice in voices:
-                        if not any(fem in voice.name.lower() for fem in ['zira', 'hazel', 'female', 'woman', 'girl']):
+                        if voice and hasattr(voice, 'name') and not any(fem in voice.name.lower() for fem in ['zira', 'hazel', 'female', 'woman', 'girl']):
                             self.tts_engine.setProperty('voice', voice.id)
                             logger.info(f"Fallback masculine voice: {voice.name}")
                             break
                     else:
                         # Last resort: use first available voice
-                        self.tts_engine.setProperty('voice', voices[0].id)
-                        logger.info(f"Default voice: {voices[0].name}")
+                        if voices and voices[0]:
+                            self.tts_engine.setProperty('voice', voices[0].id)
+                            logger.info(f"Default voice: {voices[0].name}")
+            
+            # Test the engine with a simple call
+            self.tts_engine.say("")
+            self.tts_engine.runAndWait()
             
             return True
         except Exception as e:
             logger.error(f"TTS initialization failed: {e}")
+            self.tts_engine = None
             return False
     
     def _check_ffmpeg(self):
@@ -93,13 +130,12 @@ class AudioProcessor:
         Windows:
         1. Download from https://ffmpeg.org/download.html
         2. Extract to a folder (e.g., C:\\ffmpeg)
-        3. Add C:\\ffmpeg\\bin to your system PATH        
-        Or use chocolatey: choco install ffmpeg
+        3. Add C:\\ffmpeg\\bin to your system PATH          Or use chocolatey: choco install ffmpeg
         Or use winget: winget install FFmpeg        """
     
     def speak_text(self, text):
         """Convert text to speech with masculine robotic voice - thread safe"""
-        if not self.tts_available:
+        if not self.tts_available or not self.tts_engine:
             logger.warning("TTS not available")
             return False
         
@@ -118,6 +154,10 @@ class AudioProcessor:
                 # Clean text for better speech
                 clean_text = re.sub(r'[^\w\s.,!?-]', '', text)
                 
+                # Skip empty text
+                if not clean_text.strip():
+                    return True
+                
                 # Optimize TTS settings for masculine robotic voice
                 self.tts_engine.setProperty('rate', 130)  # Slower for authoritative delivery
                 self.tts_engine.setProperty('volume', 1.0)  # Full volume for presence
@@ -128,21 +168,31 @@ class AudioProcessor:
                     # Re-prioritize masculine voices each time for consistency
                     masculine_voice = None
                     for voice in voices:
-                        # Check for masculine indicators
-                        voice_name = voice.name.lower()
-                        if any(masc in voice_name for masc in ['david', 'mark', 'george', 'male', 'man', 'deep', 'bass']):
-                            masculine_voice = voice
-                            break
-                        elif 'british' in voice_name and 'female' not in voice_name:
-                            masculine_voice = voice
-                            break
+                        if voice and hasattr(voice, 'name'):
+                            # Check for masculine indicators
+                            voice_name = voice.name.lower()
+                            if any(masc in voice_name for masc in ['david', 'mark', 'george', 'male', 'man', 'deep', 'bass']):
+                                masculine_voice = voice
+                                break
+                            elif 'british' in voice_name and 'female' not in voice_name:
+                                masculine_voice = voice
+                                break
                     
                     if masculine_voice:
                         self.tts_engine.setProperty('voice', masculine_voice.id)
                 
                 # Generate speech with authoritative timing
-                self.tts_engine.say(clean_text)
-                self.tts_engine.runAndWait()
+                # Use try-catch specifically for pyttsx3 operations
+                try:
+                    self.tts_engine.say(clean_text)
+                    self.tts_engine.runAndWait()
+                except Exception as tts_error:
+                    logger.error(f"TTS engine error: {tts_error}")
+                    # Try to reinitialize the engine if it fails
+                    if "runAndWait" in str(tts_error):
+                        logger.info("Attempting to reinitialize TTS engine...")
+                        self.tts_available = self._init_tts()
+                    return False
                 
                 # Add a small delay to ensure audio completes
                 time.sleep(0.3)  # Reduced delay for better responsiveness
@@ -166,7 +216,21 @@ class AudioProcessor:
                 '-y'  # Overwrite output file
             ]
             
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            # Create startup info to hide console window on Windows
+            startupinfo = None
+            if sys.platform == "win32":
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = subprocess.SW_HIDE
+            
+            result = subprocess.run(
+                cmd, 
+                capture_output=True, 
+                text=True, 
+                timeout=30,
+                startupinfo=startupinfo,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+            )
             
             if result.returncode != 0:
                 raise Exception(f"FFmpeg conversion failed: {result.stderr}")
@@ -322,10 +386,10 @@ class AudioProcessor:
         except Exception as e:
             logger.error(f"Voice configuration error: {e}")
             return False
-
+    
     def speak_text_with_settings(self, text, gender="male", speed=150, volume=100):
         """Speak text with custom voice settings - thread safe"""
-        if not self.tts_available:
+        if not self.tts_available or not self.tts_engine:
             logger.warning("TTS not available")
             return False
         
@@ -348,9 +412,21 @@ class AudioProcessor:
                 # Clean text for better speech
                 clean_text = re.sub(r'[^\w\s.,!?-]', '', text)
                 
-                # Generate speech
-                self.tts_engine.say(clean_text)
-                self.tts_engine.runAndWait()
+                # Skip empty text
+                if not clean_text.strip():
+                    return True
+                
+                # Generate speech with error handling
+                try:
+                    self.tts_engine.say(clean_text)
+                    self.tts_engine.runAndWait()
+                except Exception as tts_error:
+                    logger.error(f"TTS engine error with settings: {tts_error}")
+                    # Try to reinitialize the engine if it fails
+                    if "runAndWait" in str(tts_error):
+                        logger.info("Attempting to reinitialize TTS engine...")
+                        self.tts_available = self._init_tts()
+                    return False
                 
                 # Add a small delay to ensure audio completes
                 time.sleep(0.3)

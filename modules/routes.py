@@ -6,6 +6,9 @@ Contains all Flask route definitions organized by functionality
 from flask import render_template, request, jsonify, redirect, url_for, send_file, flash
 import logging
 import datetime
+import os
+import tempfile
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -363,8 +366,7 @@ class RouteManager:
                                  search='',
                                  entryType='',
                                  date='')
-    
-    # API routes
+      # API routes
     def transcribe_and_analyze_audio(self):
         """Handle audio transcription and analysis"""
         try:
@@ -376,9 +378,30 @@ class RouteManager:
             if audio_file.filename == '':
                 return jsonify({'status': 'error', 'message': 'No audio file selected'})
             
-            # Process audio file
-            audio_result = self.audio_processor.process_audio_file(audio_file)
-            transcription = audio_result['transcription']
+            # Save the uploaded file temporarily
+            # Create a temporary file with proper extension
+            file_extension = '.webm' if audio_file.content_type == 'audio/webm' else '.wav'
+            temp_filename = f"audio_{uuid.uuid4().hex}{file_extension}"
+            temp_filepath = os.path.join('uploads', temp_filename)
+            
+            # Ensure uploads directory exists
+            os.makedirs('uploads', exist_ok=True)
+            
+            # Save the uploaded file
+            audio_file.save(temp_filepath)
+            
+            try:
+                # Process audio file with the saved file path
+                audio_result = self.audio_processor.process_audio_file(temp_filepath)
+                transcription = audio_result['transcription']
+                
+            finally:
+                # Clean up temporary file
+                try:
+                    if os.path.exists(temp_filepath):
+                        os.remove(temp_filepath)
+                except Exception as cleanup_error:
+                    logger.warning(f"Failed to clean up temp file: {cleanup_error}")
             
             # Get AI analysis and response
             try:

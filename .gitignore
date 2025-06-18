@@ -1,0 +1,36 @@
+# 🐍 Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 🧪 Testing Cache
+*.log
+*.tmp
+
+# 🔒 Secrets & Environment Variables
+.env
+
+# 🧠 Diary Entries (user data, sensitive)
+daily_diary/
+
+# 📥 Audio Uploads (temp user files)
+uploads/
+
+# 🧠 AI Model Cache or Outputs (if any added later)
+*.pkl
+*.pt
+*.h5
+
+# 🧰 IDE/Editor Settings (specific to PyCharm/VSCode)
+.idea/
+*.iml
+.vscode/
+
+# 📦 Package-lock, virtualenvs (if used)
+venv/
+env/
+*.egg-info/
+
+# 🧾 Mac/Linux/Windows junk files
+.DS_Store
+Thumbs.db

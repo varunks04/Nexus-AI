@@ -346,6 +346,26 @@
                 align-items: center;
             }
         }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #00ff00;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 10000;
+            font-family: 'Orbitron', monospace;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+
+        .notification.error {
+            background: #ff4444;
+        }
     </style>
 </head>
 <body>
@@ -417,10 +437,35 @@
                     <a href="/" class="back-btn">← Return to Interface</a>
                 </div>
             </form>
-        </div>
-    </div>
+        </div>    </div>
 
     <script>
+        // Enhanced notification system instead of alerts
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#ff4444' : '#00ff00'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                font-family: 'Orbitron', monospace;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
         // Enhanced mood selection
         document.querySelectorAll('.mood-option').forEach(option => {
             option.addEventListener('click', function() {
@@ -458,19 +503,19 @@
                         window.location.href = '/archive';
                     }, 2000);
                 } else {
-                    alert('Error saving neural pattern: ' + data.message);
+                    showNotification('❌ Error saving neural pattern: ' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Neural processing error occurred');
+                showNotification('❌ Neural processing error occurred', 'error');
             });
         });
 
         // Enhanced voice input
         function startVoiceInput() {
             if (!('webkitSpeechRecognition' in window)) {
-                alert('Voice neural interface not supported in this browser');
+                showNotification('❌ Voice neural interface not supported in this browser', 'error');
                 return;
             }
 
@@ -510,7 +555,7 @@
             recognition.onerror = function(event) {
                 console.error('Voice neural error:', event.error);
                 document.getElementById('voiceIndicator').remove();
-                alert('Voice neural interface error: ' + event.error);
+                showNotification('❌ Voice neural interface error: ' + event.error, 'error');
             };
 
             recognition.onend = function() {
@@ -518,6 +563,32 @@
             };
 
             recognition.start();
+        }
+
+        // Enhanced notification system instead of alerts
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#ff4444' : '#00ff00'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                font-family: 'Orbitron', monospace;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
         }
 
         // Neural interface particles

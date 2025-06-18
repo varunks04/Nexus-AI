@@ -656,9 +656,33 @@
     </div>
 
     <!-- Quantum Time Display -->
-    <div class="quantum-time" id="quantumTime"></div>
+    <div class="quantum-time" id="quantumTime"></div>    <script>
+        // Enhanced notification system instead of alerts
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#ff4444' : '#00ff00'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                font-family: 'Orbitron', monospace;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
 
-    <script>
         class LightningSystem {
             constructor() {
                 this.svg = document.querySelector('.lightning-container');
@@ -715,14 +739,13 @@
                                 card.style.animation = 'fadeOut 0.5s ease-out forwards';
                                 setTimeout(() => location.reload(), 500);
                             }
-                        });
-                    } else {
-                        alert('❌ Error deleting entry: ' + (data.message || 'Unknown error'));
+                        });                    } else {
+                        showNotification('❌ Error deleting entry: ' + (data.message || 'Unknown error'), 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('❌ Network error occurred while deleting entry');
+                    showNotification('❌ Network error occurred while deleting entry', 'error');
                 });
             }
         }
