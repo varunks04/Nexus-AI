@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Input Interface - JARVIS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 5vw 5vh;
+            animation: quantumFlow 20s linear infinite;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(5vw, 5vh); }
+        }
+
+        .input-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: clamp(20px, 4vh, 40px);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .neural-header {
+            text-align: center;
+            padding: clamp(20px, 4vh, 40px);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(15px, 3vh, 25px);
+            margin-bottom: clamp(20px, 4vh, 30px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 clamp(30px, 6vh, 50px) rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+        }
+
+        .neural-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .input-title {
+            font-size: clamp(24px, 5vh, 42px);
+            font-weight: 900;
+            margin-bottom: clamp(10px, 2vh, 15px);
+            color: #00ffff;
+            text-shadow: 0 0 clamp(15px, 3vh, 30px) #00ffff, 0 0 clamp(30px, 6vh, 60px) #0088ff;
+            letter-spacing: 3px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .input-subtitle {
+            font-size: clamp(12px, 2vh, 16px);
+            color: #00d4ff;
+            font-weight: 400;
+            letter-spacing: 1px;
+            font-family: 'Rajdhani', sans-serif;
+            z-index: 1;
+            position: relative;
+        }
+
+        .quantum-orb {
+            width: clamp(120px, 18vh, 180px);
+            height: clamp(120px, 18vh, 180px);
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            margin: clamp(15px, 3vh, 25px) auto;
+            position: relative;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.2), transparent);
+            box-shadow: 0 0 clamp(30px, 6vh, 50px) rgba(0, 255, 255, 0.6);
+            animation: quantumPulse 2s ease-in-out infinite;
+        }
+
+        .quantum-orb::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: orbRotate 4s linear infinite;
+        }
+
+        .quantum-orb::after {
+            content: '📝';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(40px, 8vh, 60px);
+            animation: iconFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes quantumPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes orbRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .input-form {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(15px, 3vh, 25px);
+            padding: clamp(25px, 5vh, 40px);
+            box-shadow: 0 0 clamp(30px, 6vh, 50px) rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+            margin-bottom: clamp(20px, 4vh, 30px);
+        }
+
+        .form-group {
+            margin-bottom: clamp(20px, 4vh, 30px);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: clamp(10px, 2vh, 15px);
+            color: #00ffff;
+            font-weight: 700;
+            font-size: clamp(14px, 2.5vh, 18px);
+            text-shadow: 0 0 10px #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            height: clamp(200px, 30vh, 300px);
+            background: rgba(0, 20, 40, 0.9);
+            border: 2px solid #00d4ff;
+            border-radius: clamp(10px, 2vh, 15px);
+            padding: clamp(15px, 3vh, 25px);
+            color: #00ffff;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(12px, 2vh, 16px);
+            resize: vertical;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 clamp(15px, 3vh, 25px) rgba(0, 255, 255, 0.5);
+            background: rgba(0, 30, 60, 0.95);
+        }
+
+        .form-textarea::placeholder {
+            color: #0088ff;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: clamp(15px, 3vh, 25px) 0;
+            padding: clamp(12px, 2.5vh, 20px);
+            background: rgba(0, 255, 255, 0.08);
+            border-radius: clamp(8px, 1.5vh, 12px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-checkbox {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            accent-color: #00ffff;
+        }
+
+        .checkbox-label {
+            color: #00d4ff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: clamp(12px, 2vh, 16px);
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #ff4444, #ffff00, #44ff44);
+            background-size: 300% 100%;
+            border: none;
+            padding: clamp(15px, 3vh, 25px) clamp(30px, 6vw, 50px);
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: clamp(10px, 2vh, 18px);
+            font-size: clamp(14px, 2.5vh, 18px);
+            margin: clamp(10px, 2vh, 15px);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 clamp(20px, 4vh, 30px) rgba(255, 255, 0, 0.6);
+            animation: colorShift 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes colorShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px clamp(30px, 6vh, 50px) rgba(255, 255, 0, 0.8);
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #333, #666);
+            border: 2px solid #00d4ff;
+            padding: clamp(10px, 2vh, 15px) clamp(20px, 4vw, 35px);
+            color: #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: clamp(8px, 1.5vh, 12px);
+            text-decoration: none;
+            display: inline-block;
+            font-size: clamp(12px, 2vh, 16px);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(45deg, #00d4ff, #0088ff);
+            color: #000;
+            box-shadow: 0 0 clamp(15px, 3vh, 25px) #00ffff;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: clamp(20px, 4vh, 30px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .input-container {
+                padding: 15px;
+            }
+            
+            .neural-header {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .input-form {
+                padding: 20px;
+            }
+            
+            .form-textarea {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+    
+    <div class="input-container">
+        <div class="neural-header">
+            <h1 class="input-title">Quantum Input Interface</h1>
+            <p class="input-subtitle">Advanced Text Processing & Neural Analysis System</p>
+            <div class="quantum-orb"></div>
+        </div>
+        
+        <form action="/process-input" method="POST" class="input-form">
+            <div class="form-group">
+                <label class="form-label">Neural Data Input Stream:</label>
+                <textarea name="diary_text" class="form-textarea" placeholder="Input your thoughts, experiences, emotions, and daily observations into the quantum matrix. JARVIS will process and analyze your neural patterns for deeper insights and emotional understanding..." required></textarea>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" name="edit_before_analysis" class="form-checkbox" id="edit-checkbox">
+                <label for="edit-checkbox" class="checkbox-label">Enable pre-analysis editing mode</label>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="submit-btn">Process Neural Data</button>
+                <a href="/" class="back-btn">← Return to Interface</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

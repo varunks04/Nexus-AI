@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Analysis Interface - JARVIS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: quantumFlow 20s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .analyze-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .neural-header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+        }
+
+        .neural-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .analyze-title {
+            font-size: 3em;
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 30px #00ffff, 0 0 60px #0088ff;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .analyze-orb {
+            width: 120px;
+            height: 120px;
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            margin: 20px auto;
+            position: relative;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.2), transparent);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
+            animation: orbPulse 2s ease-in-out infinite;
+        }
+
+        .analyze-orb::after {
+            content: '📊';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .control-panel {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #00ffff;
+            font-weight: 700;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px #00ffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '⚡';
+            font-size: 1.2em;
+        }
+
+        .date-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-input {
+            padding: 12px 15px;
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 10px;
+            color: #00ffff;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 30, 60, 0.9);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        .form-checkbox {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: #00ffff;
+        }
+
+        .checkbox-label {
+            color: #00d4ff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(45deg, #ff4444, #ffff00, #44ff44);
+            background-size: 300% 100%;
+            border: none;
+            padding: 15px 40px;
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.3em;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 25px rgba(255, 255, 0, 0.6);
+            animation: colorShift 3s ease-in-out infinite;
+            display: block;
+            margin: 0 auto;
+            width: fit-content;
+        }
+
+        @keyframes colorShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 35px rgba(255, 255, 0, 0.8);
+        }
+
+        .results-container {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            pointer-events: none;
+        }
+
+        .results-container.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .analysis-section {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+        }
+
+        .analysis-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.05), transparent);
+            animation: analysisGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes analysisGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .section-header h3 {
+            color: #00ffff;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        .chart-container {
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            z-index: 1;
+            position: relative;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .analysis-detail {
+            background: rgba(0, 30, 60, 0.6);
+            border: 2px solid #00d4ff;
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .detail-title {
+            color: #00ffff;
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .detail-list {
+            list-style: none;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-name {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            color: #00ff00;
+            font-weight: 700;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #333, #666);
+            border: 2px solid #00d4ff;
+            padding: 12px 25px;
+            color: #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(45deg, #00d4ff, #0088ff);
+            color: #000;
+            box-shadow: 0 0 20px #00ffff;
+            text-decoration: none;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 40px;
+            color: #00ffff;
+            font-size: 1.2em;
+            display: none;
+        }
+
+        .loading-orb {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #00d4ff;
+            border-top: 3px solid #00ffff;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .analyze-container {
+                padding: 15px;
+            }
+
+            .control-panel {
+                padding: 20px;
+            }
+
+            .analyze-title {
+                font-size: 2.5em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .analyze-title {
+                font-size: 2em;
+            }
+
+            .date-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+    
+    <div class="analyze-container">
+        <div class="neural-header">
+            <h1 class="analyze-title">Neural Analysis Interface</h1>
+            <p style="color: #00d4ff; font-family: Rajdhani, sans-serif; font-weight: 600; z-index: 1; position: relative;">Deep Pattern Recognition & Consciousness Analytics</p>
+            <div class="analyze-orb"></div>
+        </div>
+        
+        <div class="control-panel">
+            <div class="control-section">
+                <div class="section-title">Temporal Analysis Range</div>
+                <div class="date-inputs">
+                    <input type="date" class="form-input" id="startDate" placeholder="Start Date">
+                    <input type="date" class="form-input" id="endDate" placeholder="End Date">
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="section-title">Analysis Protocols</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" class="form-checkbox" id="emotion" checked>
+                        <label class="checkbox-label" for="emotion">Emotional Pattern Analysis</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" class="form-checkbox" id="sentiment" checked>
+                        <label class="checkbox-label" for="sentiment">Sentiment Trajectory Mapping</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" class="form-checkbox" id="topic" checked>
+                        <label class="checkbox-label" for="topic">Neural Topic Clustering</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="analyze-btn" onclick="startAnalysis()">
+                ⚡ Initiate Neural Analysis
+            </button>
+        </div>
+
+        <div class="loading-indicator" id="loadingIndicator">
+            <div class="loading-orb"></div>
+            <p>Processing Neural Patterns...</p>
+        </div>
+
+        <div class="results-container" id="resultsContainer">
+            <div class="analysis-section" id="emotionSection">
+                <div class="section-header">
+                    <h3>😊 Emotional Intelligence Analysis</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="emotionChart"></canvas>
+                </div>
+                <div class="analysis-grid">
+                    <div class="analysis-detail">
+                        <div class="detail-title">Dominant Emotions</div>
+                        <ul class="detail-list" id="emotionDetails">
+                            <!-- Populated by JavaScript -->
+                        </ul>
+                    </div>
+                    <div class="analysis-detail">
+                        <div class="detail-title">Neural Insights</div>
+                        <p id="emotionTrends" style="color: #00d4ff; line-height: 1.6;">Analysis results will appear here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analysis-section" id="sentimentSection">
+                <div class="section-header">
+                    <h3>📈 Sentiment Trajectory Analysis</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+                <div class="analysis-grid">
+                    <div class="analysis-detail">
+                        <div class="detail-title">Sentiment Overview</div>
+                        <p id="sentimentOverall" style="color: #00d4ff; line-height: 1.6;">Analysis results will appear here...</p>
+                    </div>
+                    <div class="analysis-detail">
+                        <div class="detail-title">Pattern Changes</div>
+                        <p id="sentimentChanges" style="color: #00d4ff; line-height: 1.6;">Analysis results will appear here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analysis-section" id="topicSection">
+                <div class="section-header">
+                    <h3>🧠 Topic Clustering Analysis</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="topicChart"></canvas>
+                </div>
+                <div class="analysis-grid">
+                    <div class="analysis-detail">
+                        <div class="detail-title">Key Topics</div>
+                        <ul class="detail-list" id="topicDetails">
+                            <!-- Populated by JavaScript -->
+                        </ul>
+                    </div>
+                    <div class="analysis-detail">
+                        <div class="detail-title">Neural Relationships</div>
+                        <p id="topicRelationships" style="color: #00d4ff; line-height: 1.6;">Analysis results will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="back-btn">← Return to Neural Interface</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let emotionChart, sentimentChart, topicChart;
+
+        function startAnalysis() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+
+            const analysisTypes = {
+                emotion: document.getElementById('emotion').checked,
+                sentiment: document.getElementById('sentiment').checked,
+                topic: document.getElementById('topic').checked
+            };
+
+            // Show loading indicator
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('resultsContainer').classList.remove('show');
+
+            // Simulate analysis delay
+            setTimeout(() => {
+                performAnalysis(startDate, endDate, analysisTypes);
+            }, 2000);
+        }
+
+        function performAnalysis(startDate, endDate, analysisTypes) {
+            fetch('/analyze-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    startDate: startDate,
+                    endDate: endDate,
+                    analysisTypes: analysisTypes
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                displayResults(data);
+            })
+            .catch(error => {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                alert('Analysis error: ' + error.message);
+            });
+        }
+
+        function displayResults(data) {
+            // Show results container
+            document.getElementById('resultsContainer').classList.add('show');
+
+            // Display emotion analysis
+            if (data.emotion) {
+                displayEmotionAnalysis(data.emotion);
+            }
+
+            // Display sentiment analysis
+            if (data.sentiment) {
+                displaySentimentAnalysis(data.sentiment);
+            }
+
+            // Display topic analysis
+            if (data.topic) {
+                displayTopicAnalysis(data.topic);
+            }
+        }
+
+        function displayEmotionAnalysis(emotionData) {
+            // Create emotion chart
+            const ctx = document.getElementById('emotionChart').getContext('2d');
+            
+            if (emotionChart) {
+                emotionChart.destroy();
+            }
+
+            emotionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: emotionData.dates || ['Sample Date'],
+                    datasets: emotionData.datasets || [
+                        {
+                            label: 'Happy',
+                            data: [75],
+                            borderColor: '#00ff00',
+                            backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Sad',
+                            data: [25],
+                            borderColor: '#00d4ff',
+                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#00d4ff'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#00d4ff' },
+                            grid: { color: 'rgba(0, 212, 255, 0.2)' }
+                        },
+                        y: {
+                            ticks: { color: '#00d4ff' },
+                            grid: { color: 'rgba(0, 212, 255, 0.2)' }
+                        }
+                    }
+                }
+            });
+
+            // Update emotion details
+            const emotionDetails = document.getElementById('emotionDetails');
+            emotionDetails.innerHTML = '';
+            
+            const emotions = emotionData.dominant || [
+                { name: 'Positive', percentage: 75 },
+                { name: 'Neutral', percentage: 20 },
+                { name: 'Reflective', percentage: 5 }
+            ];
+
+            emotions.forEach(emotion => {
+                const li = document.createElement('li');
+                li.className = 'detail-item';
+                li.innerHTML = `
+                    <span class="detail-name">${emotion.name}</span>
+                    <span class="detail-value">${emotion.percentage}%</span>
+                `;
+                emotionDetails.appendChild(li);
+            });
+
+            document.getElementById('emotionTrends').textContent = emotionData.trends || 'Neural patterns show predominantly positive emotional states with stable psychological well-being indicators.';
+        }
+
+        function displaySentimentAnalysis(sentimentData) {
+            const ctx = document.getElementById('sentimentChart').getContext('2d');
+            
+            if (sentimentChart) {
+                sentimentChart.destroy();
+            }
+
+            sentimentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sentimentData.dates || ['Analysis Period'],
+                    datasets: sentimentData.datasets || [
+                        {
+                            label: 'Positive',
+                            data: [80],
+                            backgroundColor: 'rgba(0, 255, 0, 0.8)',
+                            borderColor: '#00ff00'
+                        },
+                        {
+                            label: 'Negative',
+                            data: [15],
+                            backgroundColor: 'rgba(255, 68, 68, 0.8)',
+                            borderColor: '#ff4444'
+                        },
+                        {
+                            label: 'Neutral',
+                            data: [5],
+                            backgroundColor: 'rgba(255, 255, 0, 0.8)',
+                            borderColor: '#ffff00'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#00d4ff'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#00d4ff' },
+                            grid: { color: 'rgba(0, 212, 255, 0.2)' }
+                        },
+                        y: {
+                            ticks: { color: '#00d4ff' },
+                            grid: { color: 'rgba(0, 212, 255, 0.2)' }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('sentimentOverall').textContent = sentimentData.overall || 'Overall sentiment analysis shows positive psychological state with high emotional resilience.';
+            document.getElementById('sentimentChanges').textContent = sentimentData.changes || 'Sentiment patterns remain consistent with minor fluctuations within normal psychological parameters.';
+        }
+
+        function displayTopicAnalysis(topicData) {
+            const ctx = document.getElementById('topicChart').getContext('2d');
+            
+            if (topicChart) {
+                topicChart.destroy();
+            }
+
+            topicChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: topicData.labels || ['Work', 'Personal', 'Health', 'Hobbies'],
+                    datasets: [{
+                        data: topicData.datasets?.[0]?.data || [40, 30, 20, 10],
+                        backgroundColor: [
+                            'rgba(0, 255, 0, 0.8)',
+                            'rgba(0, 212, 255, 0.8)',
+                            'rgba(255, 255, 0, 0.8)',
+                            'rgba(255, 0, 255, 0.8)'
+                        ],
+                        borderColor: [
+                            '#00ff00',
+                            '#00d4ff',
+                            '#ffff00',
+                            '#ff00ff'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#00d4ff'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update topic details
+            const topicDetails = document.getElementById('topicDetails');
+            topicDetails.innerHTML = '';
+            
+            const topics = topicData.key || [
+                { name: 'Work & Career', frequency: 45 },
+                { name: 'Personal Growth', frequency: 30 },
+                { name: 'Health & Wellness', frequency: 15 },
+                { name: 'Recreation', frequency: 10 }
+            ];
+
+            topics.forEach(topic => {
+                const li = document.createElement('li');
+                li.className = 'detail-item';
+                li.innerHTML = `
+                    <span class="detail-name">${topic.name}</span>
+                    <span class="detail-value">${topic.frequency}</span>
+                `;
+                topicDetails.appendChild(li);
+            });
+
+            document.getElementById('topicRelationships').textContent = topicData.relationships || 'Neural topic analysis reveals strong interconnections between personal development themes and professional growth patterns.';
+        }
+
+        // Set default dates
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            document.getElementById('startDate').value = oneWeekAgo.toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>

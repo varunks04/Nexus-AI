@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - JARVIS AI Diary</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        .quantum-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: quantumFlow 20s linear infinite;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .result-container {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.3);
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(20px);
+        }
+
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .result-title {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .result-orb {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #00ff00, #008000);
+            border-radius: 50%;
+            position: relative;
+            animation: resultPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 40px #00ff00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: #000;
+        }
+
+        .result-orb::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 3px solid #00ff00;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: resultRotate 3s linear infinite;
+        }
+
+        @keyframes resultPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes resultRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-icon {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid #00d4ff;
+            border-radius: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+        }
+
+        .section-content {
+            line-height: 1.6;
+            color: #00d4ff;
+            font-size: 1.1em;
+            white-space: pre-wrap;
+            font-family: 'Orbitron', monospace;
+            background: rgba(0, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #666666, #999999);
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 10px 0 0;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-btn:hover {
+            box-shadow: 0 0 20px #999999;
+            transform: translateY(-2px);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .try-again-btn {
+            background: linear-gradient(45deg, #ff4444, #ffff00);
+            border: none;
+            padding: 15px 30px;
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 10px 0 0;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+        }
+
+        .try-again-btn:hover {
+            box-shadow: 0 0 30px #ffff00;
+            transform: translateY(-2px) scale(1.05);
+            color: #000;
+            text-decoration: none;
+        }
+
+        .save-status {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 1.1em;
+            position: relative;
+            z-index: 1;
+            animation: saveGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes saveGlow {
+            0% { box-shadow: 0 0 15px rgba(0, 255, 0, 0.3); }
+            100% { box-shadow: 0 0 25px rgba(0, 255, 0, 0.6); }
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+    
+    <div class="result-container">
+        <h1 class="result-title">{{ title }}</h1>
+        
+        <div class="result-icon">
+            <div class="result-orb">✅</div>
+        </div>
+        
+        {% if raw_data %}
+        <div class="result-section">
+            <h2 class="section-title">📊 Neural Input Data</h2>
+            <div class="section-content">{{ raw_data }}</div>
+        </div>
+        {% endif %}
+        
+        <div class="result-section">
+            <h2 class="section-title">🧠 AI Neural Analysis</h2>
+            <div class="section-content">{{ analysis }}</div>
+        </div>
+        
+        <div class="save-status">
+            ✅ Neural data successfully archived to quantum storage: {{ entry_type }}
+        </div>
+        
+        <div class="button-group">
+            <a href="/" class="back-btn">← Return to Neural Interface</a>
+            {% if 'process_' in request.endpoint %}
+            <a href="{{ url_for(request.endpoint.replace('process_', '')) }}" class="try-again-btn">🔄 Reinitialize Process</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

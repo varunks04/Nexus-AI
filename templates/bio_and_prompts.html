@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS Neural Configuration - Bio & Prompts Interface</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Quantum Grid Background */
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 5vw 5vh;
+            animation: quantumFlow 20s linear infinite;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(5vw, 5vh); }
+        }
+
+        /* Holographic Particles */
+        .holo-particle {
+            position: fixed;
+            width: 0.3vh;
+            height: 0.3vh;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 1vh #00ffff;
+            animation: particleFloat 15s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(30vw); opacity: 0; }
+        }
+
+        /* Enhanced Header */
+        .quantum-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(15px, 3vh, 30px);
+            padding: clamp(20px, 4vh, 40px) clamp(30px, 5vw, 60px);
+            margin: clamp(20px, 3vh, 40px) clamp(20px, 3vw, 40px);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 clamp(30px, 6vh, 70px) rgba(0, 212, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .quantum-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            animation: headerScan 4s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .neural-logo {
+            display: flex;
+            align-items: center;
+            gap: clamp(15px, 3vw, 30px);
+            z-index: 1;
+        }
+
+        .core-orb {
+            width: clamp(60px, 8vh, 100px);
+            height: clamp(60px, 8vh, 100px);
+            background: radial-gradient(circle at 30% 30%, #ffffff, #00ffff, #0080ff);
+            border-radius: 50%;
+            position: relative;
+            animation: orbPulse 2.5s ease-in-out infinite;
+            box-shadow: 0 0 clamp(20px, 4vh, 50px) #00ffff;
+        }
+
+        .core-orb::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: orbRotate 4s linear infinite;
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes orbRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .system-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(20px, 4vh, 42px);
+            font-weight: 700;
+            color: #00ffff;
+            text-shadow: 0 0 clamp(15px, 3vh, 35px) #00ffff;
+            letter-spacing: 0.2em;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(12px, 2vh, 18px);
+            color: #00d4ff;
+            opacity: 0.9;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: clamp(20px, 3vh, 40px);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            margin-bottom: 2rem;
+        }
+
+        .flash-message {
+            padding: 1.2rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            animation: flashPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes flashPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.3); }
+            50% { box-shadow: 0 0 35px rgba(0, 255, 0, 0.6); }
+        }
+
+        /* Enhanced Form Containers */
+        .form-container {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(15px, 3vh, 25px);
+            padding: clamp(25px, 4vh, 40px);
+            margin-bottom: clamp(25px, 4vh, 40px);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 clamp(25px, 5vh, 60px) rgba(0, 212, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg,
+                transparent 30%,
+                rgba(0, 255, 255, 0.1) 50%,
+                transparent 70%);
+            animation: containerSweep 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes containerSweep {
+            0% { transform: translateX(-100%) skewX(-15deg); }
+            100% { transform: translateX(100%) skewX(-15deg); }
+        }
+
+        .section-title {
+            color: #00ffff;
+            font-size: clamp(18px, 3vh, 28px);
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: clamp(20px, 3vh, 30px);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            text-shadow: 0 0 clamp(10px, 2vh, 25px) #00ffff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            margin-bottom: clamp(20px, 3vh, 30px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+            color: #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: clamp(14px, 2.2vh, 20px);
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Enhanced Dynamic Textareas */
+        .neural-textarea {
+            width: 100%;
+            min-height: 80px;
+            max-height: 400px;
+            padding: clamp(15px, 2.5vh, 25px);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            background: rgba(0, 20, 40, 0.8);
+            color: #00ffff;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(13px, 2vh, 16px);
+            line-height: 1.6;
+            transition: all 0.4s ease;
+            resize: none;
+            outline: none;
+            backdrop-filter: blur(10px);
+            box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .neural-textarea:focus {
+            border-color: #00ffff;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 255, 0.4),
+                inset 0 0 30px rgba(0, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .neural-textarea::placeholder {
+            color: rgba(0, 212, 255, 0.6);
+            font-style: italic;
+        }
+
+        .neural-textarea.ai-name {
+            min-height: 60px;
+            font-size: clamp(16px, 2.5vh, 22px);
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.1em;
+        }
+
+        .neural-textarea.bio-field {
+            min-height: 150px;
+        }
+
+        .neural-textarea.prompt-field {
+            min-height: 200px;
+            font-family: 'Rajdhani', sans-serif;
+        }        /* Character Counter */
+        .char-counter {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: clamp(10px, 1.5vh, 14px);
+            color: #87CEEB;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            pointer-events: none;
+        }.help-text {
+            margin-top: 0.8rem;
+            font-size: clamp(11px, 1.8vh, 15px);
+            color: #87CEEB;
+            font-family: 'Rajdhani', sans-serif;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        /* Enhanced Submit Button */
+        .neural-submit {
+            display: flex;
+            justify-content: center;
+            margin: clamp(30px, 5vh, 50px) 0;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            padding: clamp(15px, 2.5vh, 25px) clamp(40px, 6vw, 80px);
+            border-radius: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: clamp(16px, 2.5vh, 22px);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.6);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .submit-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Enhanced Navigation */
+        .neural-navigation {
+            display: flex;
+            justify-content: center;
+            gap: clamp(20px, 4vw, 40px);
+            margin: clamp(30px, 5vh, 50px) 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: clamp(12px, 2vh, 18px) clamp(20px, 3vw, 35px);
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #00d4ff;
+            text-decoration: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: clamp(12px, 2vh, 16px);
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .neural-navigation {
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .quantum-header {
+                margin: 15px;
+                padding: 20px;
+            }
+
+            .neural-logo {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .neural-navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-link {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 20px 15px;
+            }
+
+            .neural-textarea {
+                padding: 12px;
+            }
+        }
+
+        /* Loading States */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-top: 3px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Visual Effects */
+        .form-group:hover .neural-textarea {
+            border-color: rgba(0, 255, 255, 0.6);
+            box-shadow: inset 0 0 25px rgba(0, 255, 255, 0.15);
+        }
+
+        .neural-textarea:not(:focus):hover {
+            transform: scale(1.01);
+        }
+
+        /* Voice Configuration Styles */
+        .voice-gender-selector {
+            display: flex;
+            gap: 20px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 140px;
+        }
+
+        .radio-option:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: rgba(0, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00d4ff;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .radio-custom::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 10px;
+            height: 10px;
+            background: #00ffff;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .radio-option input[type="radio"]:checked + .radio-custom {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .radio-option input[type="radio"]:checked + .radio-custom::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .radio-option input[type="radio"]:checked ~ .radio-label {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .radio-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            color: #00d4ff;
+            transition: all 0.3s ease;
+        }
+
+        .slider-container {
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .voice-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            position: relative;
+        }
+
+        .voice-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            cursor: pointer;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .voice-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+        }
+
+        .voice-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            cursor: pointer;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.8em;
+            color: rgba(0, 212, 255, 0.7);
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .test-voice-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .test-voice-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .test-voice-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.6);
+        }
+
+        .test-voice-btn:hover::before {
+            left: 100%;
+        }
+
+        .test-voice-btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .test-voice-btn.testing {
+            opacity: 0.7;
+            cursor: not-allowed;
+            animation: voicePulse 1s infinite;
+        }
+
+        @keyframes voicePulse {
+            0%, 100% { 
+                box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+            }
+            50% { 
+                box-shadow: 0 5px 30px rgba(255, 107, 53, 0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+
+    <!-- Enhanced Header -->
+    <div class="quantum-header">
+        <div class="neural-logo">
+            <div class="core-orb"></div>
+            <div>
+                <div class="system-title">🤖 {{ current_ai_name or 'JARVIS' }} Neural Configuration</div>
+                <div class="subtitle">Bio & Personality Interface</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Enhanced Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            <span>✓</span>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('update_profile') }}" id="profileForm">
+            <!-- AI Name Section -->
+            <div class="form-container">
+                <div class="section-title">🤖 AI Assistant Identity</div>
+                <div class="form-group">
+                    <label for="ai_name">
+                        <span>🎭</span>
+                        Assistant Name:
+                    </label>
+                    <div style="position: relative;">
+                        <textarea 
+                            id="ai_name" 
+                            name="ai_name" 
+                            class="neural-textarea ai-name"
+                            placeholder="Enter your AI assistant's name (e.g., JARVIS, FRIDAY, Assistant, etc.)"
+                            data-min-height="60"
+                        >{{ current_ai_name if current_ai_name != 'JARVIS' else '' }}</textarea>
+                        <div class="char-counter" id="ai-name-counter">0</div>
+                    </div>
+                    <div class="help-text">
+                        🎯 Choose what you'd like to call your AI assistant. This name will appear throughout the interface and define their identity.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bio Section -->
+            <div class="form-container">
+                <div class="section-title">🧬 User Bio & Context</div>
+                <div class="form-group">
+                    <label for="bio">
+                        <span>👤</span>
+                        Your Bio/Context:
+                    </label>
+                    <div style="position: relative;">
+                        <textarea 
+                            id="bio" 
+                            name="bio" 
+                            class="neural-textarea bio-field"
+                            placeholder="Tell your AI about yourself... Who are you? What are your interests? Your background? Be creative - you can even ask your AI to treat you like a specific character or professional!"
+                            data-min-height="150"
+                        >{{ current_bio if current_bio != 'User' else '' }}</textarea>
+                        <div class="char-counter" id="bio-counter">0</div>
+                    </div>
+                    <div class="help-text">
+                        🎭 This helps your AI understand your personality, preferences, and context. Be creative! You can ask your AI to act like you're Batman, a scientist, a writer, or any persona you prefer.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prompt Section -->
+            <div class="form-container">
+                <div class="section-title">🎭 AI Personality Matrix</div>
+                <div class="form-group">
+                    <label for="prompt">
+                        <span>🧠</span>
+                        AI Personality Instructions:
+                    </label>
+                    <div style="position: relative;">
+                        <textarea 
+                            id="prompt" 
+                            name="prompt" 
+                            class="neural-textarea prompt-field"
+                            placeholder="Define how your AI should behave, respond, and interact with you. Should they be formal or casual? Supportive or challenging? Creative or analytical? This is the core instruction that shapes their entire personality."
+                            data-min-height="200"
+                        >{{ current_prompt }}</textarea>
+                        <div class="char-counter" id="prompt-counter">0</div>
+                    </div>
+                    <div class="help-text">
+                        ⚙️ This is the core instruction that defines your AI's personality, communication style, and behavior patterns. You can modify this to completely change how your AI interacts with you.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Settings Section -->
+            <div class="form-container">
+                <div class="section-title">🎙️ Voice Configuration Matrix</div>
+                
+                <!-- Voice Gender Selection -->
+                <div class="form-group">
+                    <label for="voice-gender">
+                        <span>👨‍🔬</span>
+                        Voice Gender:
+                    </label>
+                    <div class="voice-gender-selector">
+                        <label class="radio-option">
+                            <input type="radio" name="voice_gender" value="male" id="voice-male" checked>
+                            <span class="radio-custom"></span>
+                            <span class="radio-label">👨 Male Voice</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="voice_gender" value="female" id="voice-female">
+                            <span class="radio-custom"></span>
+                            <span class="radio-label">👩 Female Voice</span>
+                        </label>
+                    </div>
+                    <div class="help-text">
+                        🎭 Choose the gender of JARVIS's voice output. This affects the default voice selection for text-to-speech.
+                    </div>
+                </div>
+
+                <!-- Voice Speed Control -->
+                <div class="form-group">
+                    <label for="voice-speed">
+                        <span>⏩</span>
+                        Voice Speed: <span id="speed-value">150</span> WPM
+                    </label>
+                    <div class="slider-container">
+                        <input type="range" id="voice-speed" name="voice_speed" min="80" max="250" value="150" class="voice-slider">
+                        <div class="slider-labels">
+                            <span>80 WPM</span>
+                            <span>165 WPM</span>
+                            <span>250 WPM</span>
+                        </div>
+                    </div>
+                    <div class="help-text">
+                        ⚡ Adjust how fast JARVIS speaks. Slower speeds may sound more natural, faster speeds are more efficient.
+                    </div>
+                </div>
+
+                <!-- Voice Volume Control -->
+                <div class="form-group">
+                    <label for="voice-volume">
+                        <span>🔊</span>
+                        Voice Volume: <span id="volume-value">100</span>%
+                    </label>
+                    <div class="slider-container">
+                        <input type="range" id="voice-volume" name="voice_volume" min="0" max="100" value="100" class="voice-slider">
+                        <div class="slider-labels">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                    <div class="help-text">
+                        📢 Control the voice output volume level.
+                    </div>
+                </div>
+
+                <!-- Voice Test Button -->
+                <div class="form-group">
+                    <button type="button" class="test-voice-btn" id="testVoiceBtn">
+                        <span>🔊</span>
+                        <span>Test Voice Settings</span>
+                    </button>
+                    <div class="help-text">
+                        🎧 Click to hear a sample with your current voice settings.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Submit Button -->
+            <div class="neural-submit">
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span>💾</span>
+                    <span>Save Neural Configuration</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Enhanced Navigation -->
+        <div class="neural-navigation">
+            <a href="{{ url_for('index') }}" class="nav-link">
+                <span>🏠</span>
+                <span>Neural Hub</span>
+            </a>
+            <a href="{{ url_for('archive') }}" class="nav-link">
+                <span>📚</span>
+                <span>Memory Archive</span>
+            </a>
+            <a href="{{ url_for('neural_record') }}" class="nav-link">
+                <span>🎙️</span>
+                <span>Neural Record</span>
+            </a>
+            <a href="{{ url_for('compose') }}" class="nav-link">
+                <span>✎</span>
+                <span>Compose Entry</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+        // Enhanced Auto-resize functionality
+        function autoResize(textarea) {
+            const minHeight = parseInt(textarea.dataset.minHeight) || 80;
+            textarea.style.height = 'auto';
+            const newHeight = Math.max(textarea.scrollHeight, minHeight);
+            textarea.style.height = newHeight + 'px';
+        }
+
+        // Initialize auto-resize for all textareas
+        const textareas = document.querySelectorAll('.neural-textarea');
+        textareas.forEach(textarea => {
+            // Set initial height
+            autoResize(textarea);
+            
+            // Add event listeners for dynamic resizing
+            textarea.addEventListener('input', () => {
+                autoResize(textarea);
+                updateCharCounter(textarea);
+            });
+            
+            textarea.addEventListener('paste', () => {
+                setTimeout(() => {
+                    autoResize(textarea);
+                    updateCharCounter(textarea);
+                }, 10);
+            });
+
+            // Initialize character counter
+            updateCharCounter(textarea);
+        });
+
+        // Character counter function
+        function updateCharCounter(textarea) {
+            const counterId = textarea.id + '-counter';
+            const counter = document.getElementById(counterId);
+            if (counter) {
+                const length = textarea.value.length;
+                counter.textContent = `${length} chars`;
+                  // Color coding based on length
+                if (length < 50) {
+                    counter.style.color = '#87CEEB';
+                } else if (length < 200) {
+                    counter.style.color = '#00ff00';
+                } else {
+                    counter.style.color = '#ffff00';
+                }
+            }
+        }
+
+        // Create holographic particles
+        function createHoloParticles() {
+            setInterval(() => {
+                for (let i = 0; i < 2; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('holo-particle');
+                    particle.style.left = Math.random() * 100 + 'vw';
+                    particle.style.animationDelay = Math.random() * 15 + 's';
+                    particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                    document.body.appendChild(particle);
+
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 25000);
+                }
+            }, 1500);
+        }        // Enhanced form submission
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            const form = e.target;
+            const button = document.getElementById('submitBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // Show loading state
+            button.classList.add('loading');
+            button.innerHTML = '<span>⚡</span><span>Updating Neural Matrix...</span>';
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                // First save voice settings
+                const gender = document.querySelector('input[name="voice_gender"]:checked').value;
+                const speed = document.getElementById('voice-speed').value;
+                const volume = document.getElementById('voice-volume').value;
+
+                const voiceResponse = await fetch('/save-voice-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        gender: gender,
+                        speed: parseInt(speed),
+                        volume: parseInt(volume)
+                    })
+                });
+
+                const voiceResult = await voiceResponse.json();
+                if (!voiceResult.success) {
+                    console.warn('Voice settings save failed:', voiceResult.message);
+                }
+
+                // Then submit the profile form normally
+                setTimeout(() => {
+                    // Create a new form data object and submit
+                    const formData = new FormData(form);
+                    
+                    // Submit the form
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    }).then(response => {
+                        if (response.ok) {
+                            window.location.href = response.url || window.location.href;
+                        } else {
+                            throw new Error('Form submission failed');
+                        }
+                    }).catch(error => {
+                        console.error('Form submission error:', error);
+                        button.innerHTML = '<span>💾</span><span>Save Neural Configuration</span>';
+                        button.classList.remove('loading');
+                        loadingOverlay.style.display = 'none';
+                    });
+                }, 500);
+
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                button.innerHTML = '<span>💾</span><span>Save Neural Configuration</span>';
+                button.classList.remove('loading');
+                loadingOverlay.style.display = 'none';
+            }
+        });
+
+        // Enhanced textarea interactions
+        textareas.forEach(textarea => {
+            textarea.addEventListener('focus', function() {
+                this.parentNode.parentNode.style.transform = 'scale(1.01)';
+                this.parentNode.parentNode.style.transition = 'transform 0.3s ease';
+            });
+            
+            textarea.addEventListener('blur', function() {
+                this.parentNode.parentNode.style.transform = 'scale(1)';
+            });
+
+            // Add typing effect
+            let typingTimer;
+            textarea.addEventListener('input', function() {
+                this.style.borderColor = '#00ffff';
+                clearTimeout(typingTimer);
+                
+                typingTimer = setTimeout(() => {
+                    this.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                }, 1000);
+            });
+        });
+
+        // Auto-save indication (visual feedback only)
+        let saveIndicator;
+        textareas.forEach(textarea => {
+            let saveTimeout;
+            textarea.addEventListener('input', function() {
+                clearTimeout(saveTimeout);
+                
+                // Remove existing indicator
+                if (saveIndicator) {
+                    saveIndicator.remove();
+                }
+                
+                // Show "unsaved changes" indicator
+                saveIndicator = document.createElement('div');
+                saveIndicator.textContent = '● Unsaved changes';
+                saveIndicator.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(255, 255, 0, 0.2);
+                    color: #ffff00;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    font-family: 'Rajdhani', sans-serif;
+                    font-size: 12px;
+                    border: 1px solid rgba(255, 255, 0, 0.3);
+                    z-index: 1000;
+                    animation: pulse 2s ease-in-out infinite;
+                `;
+                document.body.appendChild(saveIndicator);
+                
+                // Remove indicator after 3 seconds of no typing
+                saveTimeout = setTimeout(() => {
+                    if (saveIndicator) {
+                        saveIndicator.remove();
+                        saveIndicator = null;
+                    }
+                }, 3000);
+            });
+        });        // Initialize particles and effects
+        document.addEventListener('DOMContentLoaded', () => {
+            createHoloParticles();
+            
+            // Load saved voice settings
+            loadVoiceSettings();
+            
+            // Add some startup animation
+            const containers = document.querySelectorAll('.form-container');
+            containers.forEach((container, index) => {
+                container.style.opacity = '0';
+                container.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    container.style.transition = 'all 0.6s ease';
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+
+        // Voice slider value updates
+        document.getElementById('voice-speed').addEventListener('input', function() {
+            document.getElementById('speed-value').textContent = this.value;
+        });
+
+        document.getElementById('voice-volume').addEventListener('input', function() {
+            document.getElementById('volume-value').textContent = this.value;
+        });
+
+        // Load saved voice settings on page load
+        async function loadVoiceSettings() {
+            try {
+                const response = await fetch('/get-available-voices');
+                const result = await response.json();
+                
+                if (result.success && result.current_settings) {
+                    const settings = result.current_settings;
+                    
+                    // Set gender
+                    const genderRadio = document.querySelector(`input[value="${settings.gender}"]`);
+                    if (genderRadio) genderRadio.checked = true;
+                    
+                    // Set speed and volume
+                    document.getElementById('voice-speed').value = settings.speed;
+                    document.getElementById('voice-volume').value = settings.volume;
+                    document.getElementById('speed-value').textContent = settings.speed;
+                    document.getElementById('volume-value').textContent = settings.volume;
+                }
+            } catch (error) {
+                console.error('Error loading voice settings:', error);
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S to save (prevent default browser save)
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                document.getElementById('profileForm').submit();
+            }
+            
+            // Ctrl+R to reset form
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                if (confirm('Reset all fields to default values?')) {
+                    document.getElementById('profileForm').reset();
+                    textareas.forEach(textarea => {
+                        autoResize(textarea);
+                        updateCharCounter(textarea);
+                    });
+                }
+            }
+        });
+
+        // Console welcome message
+        setTimeout(() => {
+            console.log('%c🤖 JARVIS NEURAL CONFIGURATION INTERFACE', 'color: #00ffff; font-size: 16px; font-weight: bold;');
+            console.log('%c⚙️ Bio & Personality Matrix: ACTIVE', 'color: #00ff00;');
+            console.log('%c🎭 Dynamic UI: RESPONSIVE', 'color: #ffff00;');
+            console.log('%c💾 Auto-save indicators: ENABLED', 'color: #ff00ff;');
+            console.log('%c🎯 Neural configuration ready for input', 'color: #00ffff;');
+        }, 500);        // Voice configuration test functionality
+        document.getElementById('testVoiceBtn').addEventListener('click', async function() {
+            const gender = document.querySelector('input[name="voice_gender"]:checked').value;
+            const speed = document.getElementById('voice-speed').value;
+            const volume = document.getElementById('voice-volume').value;
+
+            // Disable button during test
+            this.disabled = true;
+            this.innerHTML = '<span>🔊</span><span>Testing Voice...</span>';
+
+            try {
+                const response = await fetch('/test-voice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        gender: gender,
+                        speed: parseInt(speed),
+                        volume: parseInt(volume)
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success message briefly
+                    this.innerHTML = '<span>✅</span><span>Voice Test Complete!</span>';
+                    setTimeout(() => {
+                        this.innerHTML = '<span>🔊</span><span>Test Voice Settings</span>';
+                        this.disabled = false;
+                    }, 2000);
+                } else {
+                    // Show error message
+                    this.innerHTML = '<span>❌</span><span>Voice Test Failed</span>';
+                    setTimeout(() => {
+                        this.innerHTML = '<span>🔊</span><span>Test Voice Settings</span>';
+                        this.disabled = false;
+                    }, 2000);
+                    console.error('Voice test failed:', result.message);
+                }
+            } catch (error) {
+                console.error('Voice test error:', error);
+                this.innerHTML = '<span>❌</span><span>Test Failed</span>';
+                setTimeout(() => {
+                    this.innerHTML = '<span>🔊</span><span>Test Voice Settings</span>';
+                    this.disabled = false;
+                }, 2000);
+            }
+        });
+
+        // Voice slider value updates
+        document.getElementById('voice-speed').addEventListener('input', function() {
+            document.getElementById('speed-value').textContent = this.value;
+        });
+
+        document.getElementById('voice-volume').addEventListener('input', function() {
+            document.getElementById('volume-value').textContent = this.value;
+        });
+
+        // Load saved voice settings on page load
+        async function loadVoiceSettings() {
+            try {
+                const response = await fetch('/get-available-voices');
+                const result = await response.json();
+                
+                if (result.success && result.current_settings) {
+                    const settings = result.current_settings;
+                    
+                    // Set gender
+                    document.querySelector(`input[value="${settings.gender}"]`).checked = true;
+                    
+                    // Set speed and volume
+                    document.getElementById('voice-speed').value = settings.speed;
+                    document.getElementById('voice-volume').value = settings.volume;
+                    document.getElementById('speed-value').textContent = settings.speed;
+                    document.getElementById('volume-value').textContent = settings.volume;
+                }
+            } catch (error) {
+                console.error('Error loading voice settings:', error);
+            }
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', loadVoiceSettings);
+    </script>
+</body>
+</html>

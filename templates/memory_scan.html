@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Scan - JARVIS AI Diary</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        .quantum-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: quantumFlow 20s linear infinite;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .scan-container {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.3);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(20px);
+        }
+
+        .scan-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .scan-title {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .memory-orb {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ff00ff, #8000ff);
+            border-radius: 50%;
+            position: relative;
+            animation: memoryPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 40px #ff00ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            color: #000;
+        }
+
+        .memory-orb::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 3px solid #ff00ff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            border-right-color: transparent;
+            animation: memoryRotate 4s linear infinite;
+        }
+
+        .memory-orb::after {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            border-bottom-color: transparent;
+            border-left-color: transparent;
+            animation: memoryRotate 6s linear infinite reverse;
+        }
+
+        @keyframes memoryPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes memoryRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .neural-icon {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .scan-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-module {
+            background: rgba(255, 0, 255, 0.15);
+            border: 1px solid #ff00ff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            animation: memoryGlow 2s ease-in-out infinite alternate;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ff00ff;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #ff00ff;
+            margin-top: 5px;
+        }
+
+        @keyframes memoryGlow {
+            0% { box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); }
+            100% { box-shadow: 0 0 25px rgba(255, 0, 255, 0.6); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #00d4ff;
+            font-weight: 600;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1em;
+        }
+
+        .form-textarea {
+            width: 100%;
+            height: 200px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid #ff00ff;
+            border-radius: 15px;
+            padding: 15px;
+            color: #ff00ff;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            border-color: #ff00ff;
+        }
+
+        .form-textarea::placeholder {
+            color: rgba(255, 0, 255, 0.6);
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #ff00ff, #8000ff);
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.1em;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .submit-btn:hover {
+            box-shadow: 0 0 30px #ff00ff;
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #666666, #999999);
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-btn:hover {
+            box-shadow: 0 0 20px #999999;
+            transform: translateY(-2px);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+    
+    <div class="scan-container">
+        <h1 class="scan-title">Neural Memory Scanner</h1>
+        
+        <div class="neural-icon">
+            <div class="memory-orb">🧠</div>
+        </div>
+
+        <div class="scan-stats">
+            <div class="stat-module">
+                <div class="stat-value">ACTIVE</div>
+                <div class="stat-label">SCANNER</div>
+            </div>
+            <div class="stat-module">
+                <div class="stat-value">DEEP</div>
+                <div class="stat-label">ANALYSIS</div>
+            </div>
+            <div class="stat-module">
+                <div class="stat-value">READY</div>
+                <div class="stat-label">STATUS</div>
+            </div>
+        </div>
+        
+        <form action="/process-memory-scan" method="POST">
+            <div class="form-group">
+                <label class="form-label">Enter memories for neural pattern analysis:</label>
+                <textarea name="memory_text" class="form-textarea" placeholder="Input memory data for quantum pattern recognition..." required></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="submit-btn">🧠 Initiate Memory Scan</button>
+                <a href="/" class="back-btn">← Return to Neural Interface</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

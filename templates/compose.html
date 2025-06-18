@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Composer - JARVIS Neural Interface</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: quantumFlow 20s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .compose-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .neural-header {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+        }
+
+        .neural-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .compose-title {
+            font-size: 3.5em;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: #00ffff;
+            text-shadow: 0 0 30px #00ffff, 0 0 60px #0088ff;
+            letter-spacing: 3px;
+        }
+
+        .compose-subtitle {
+            font-size: 1.2em;
+            color: #00d4ff;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .compose-form {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.4);
+            flex: 1;
+        }
+
+        .mood-section {
+            margin-bottom: 30px;
+        }
+
+        .mood-label {
+            display: block;
+            margin-bottom: 20px;
+            color: #00ffff;
+            font-weight: 700;
+            font-size: 1.3em;
+            text-shadow: 0 0 10px #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .mood-selector {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mood-option {
+            background: rgba(0, 30, 60, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mood-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .mood-option:hover::before {
+            left: 100%;
+        }
+
+        .mood-option:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.5);
+            border-color: #00ffff;
+        }
+
+        .mood-option.selected {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+        }
+
+        .mood-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .mood-text {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            color: #00d4ff;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 15px;
+            color: #00ffff;
+            font-weight: 700;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(0, 20, 40, 0.9);
+            border: 2px solid #00d4ff;
+            border-radius: 10px;
+            padding: 15px 20px;
+            color: #00ffff;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 30, 60, 0.9);
+        }
+
+        .form-input::placeholder {
+            color: #0088ff;
+            opacity: 0.7;
+        }
+
+        .form-textarea {
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 20, 40, 0.9);
+            border: 2px solid #00d4ff;
+            border-radius: 10px;
+            padding: 20px;
+            color: #00ffff;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 30, 60, 0.9);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .form-checkbox {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            accent-color: #00ffff;
+        }
+
+        .neural-btn {
+            background: linear-gradient(45deg, #ff4444, #ffff00, #44ff44);
+            background-size: 300% 100%;
+            border: none;
+            padding: 20px 40px;
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 15px;
+            font-size: 1.3em;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.6);
+            animation: colorShift 3s ease-in-out infinite;
+        }
+
+        @keyframes colorShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .neural-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 40px rgba(255, 255, 0, 0.8);
+        }
+
+        .neural-btn.secondary {
+            background: linear-gradient(45deg, #0088ff, #00ffff);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            animation: none;
+        }
+
+        .neural-btn.secondary:hover {
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.8);
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #333, #666);
+            border: 2px solid #00d4ff;
+            padding: 15px 30px;
+            color: #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(45deg, #00d4ff, #0088ff);
+            color: #000;
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .compose-title {
+                font-size: 2.5em;
+            }
+            
+            .mood-selector {
+                gap: 10px;
+            }
+            
+            .mood-option {
+                min-width: 80px;
+                padding: 15px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+    
+    <div class="compose-container">
+        <div class="neural-header">
+            <h1 class="compose-title">Mind Composer</h1>
+            <p class="compose-subtitle">Neural Thought Processing Interface</p>
+        </div>
+        
+        <div class="compose-form">
+            <form id="composeForm">
+                <input type="hidden" name="entry_id" value="{{ entry_id or '' }}">
+                
+                <div class="mood-section">
+                    <label class="mood-label">Current Neural State:</label>
+                    <div class="mood-selector">
+                        <div class="mood-option" data-mood="happy">
+                            <span class="mood-emoji">😊</span>
+                            <div class="mood-text">Euphoric</div>
+                        </div>
+                        <div class="mood-option" data-mood="neutral">
+                            <span class="mood-emoji">😐</span>
+                            <div class="mood-text">Balanced</div>
+                        </div>
+                        <div class="mood-option" data-mood="sad">
+                            <span class="mood-emoji">😢</span>
+                            <div class="mood-text">Melancholic</div>
+                        </div>
+                        <div class="mood-option" data-mood="excited">
+                            <span class="mood-emoji">🤩</span>
+                            <div class="mood-text">Energized</div>
+                        </div>
+                        <div class="mood-option" data-mood="angry">
+                            <span class="mood-emoji">😠</span>
+                            <div class="mood-text">Turbulent</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="mood" id="selectedMood">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Thought Vector Title:</label>
+                    <input type="text" class="form-input" name="title" value="{{ title or '' }}" placeholder="Neural pathway identifier..." required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Consciousness Stream:</label>
+                    <textarea class="form-textarea" name="content" placeholder="Stream your thoughts into the neural matrix. JARVIS will analyze patterns, emotions, and insights...">{{ content or '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Quantum Tags:</label>
+                    <input type="text" class="form-input" name="tags" placeholder="memory, emotion, experience, reflection">
+                    <small style="color: #0088ff; margin-top: 5px; display: block;">Tag format: memory, emotion, work, family</small>
+                </div>
+
+                <div class="checkbox-group">
+                    <input class="form-checkbox" type="checkbox" id="privateEntry" name="private">
+                    <label for="privateEntry" class="form-label" style="margin-bottom: 0;">Encrypt this neural pattern (Private Mode)</label>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="neural-btn">Process Neural Data</button>
+                    <button type="button" class="neural-btn secondary" onclick="startVoiceInput()">
+                        🎤 Voice Neural Input
+                    </button>
+                    <a href="/" class="back-btn">← Return to Interface</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced mood selection
+        document.querySelectorAll('.mood-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.mood-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('selectedMood').value = this.dataset.mood;
+            });
+        });
+
+        // Enhanced form submission
+        document.getElementById('composeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/save-entry', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Neural success feedback
+                    document.body.insertAdjacentHTML('beforeend', `
+                        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                                    background: linear-gradient(135deg, rgba(0, 255, 0, 0.9), rgba(0, 200, 0, 0.7)); 
+                                    color: #000; padding: 30px; border-radius: 15px; font-weight: 700; 
+                                    box-shadow: 0 0 50px rgba(0, 255, 0, 0.8); z-index: 1000; 
+                                    font-family: 'Rajdhani', sans-serif; font-size: 1.2em; text-align: center;">
+                            ✅ Neural Pattern Saved Successfully!<br>
+                            <small>Consciousness data secured in quantum matrix</small>
+                        </div>
+                    `);
+                    
+                    setTimeout(() => {
+                        window.location.href = '/archive';
+                    }, 2000);
+                } else {
+                    alert('Error saving neural pattern: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Neural processing error occurred');
+            });
+        });
+
+        // Enhanced voice input
+        function startVoiceInput() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert('Voice neural interface not supported in this browser');
+                return;
+            }
+
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            // Visual feedback for voice input
+            document.body.insertAdjacentHTML('beforeend', `
+                <div id="voiceIndicator" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                            background: linear-gradient(135deg, rgba(255, 0, 255, 0.9), rgba(255, 100, 255, 0.7)); 
+                            color: #fff; padding: 30px; border-radius: 50%; font-size: 2em; 
+                            box-shadow: 0 0 50px rgba(255, 0, 255, 0.8); z-index: 1000; 
+                            animation: voicePulse 1s ease-in-out infinite;">
+                    🎤
+                </div>
+                <style>
+                @keyframes voicePulse {
+                    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                    50% { transform: translate(-50%, -50%) scale(1.1); }
+                }
+                </style>
+            `);
+
+            recognition.onstart = function() {
+                console.log('🎤 Voice neural interface activated');
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join('');
+
+                document.querySelector('textarea[name="content"]').value = transcript;
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Voice neural error:', event.error);
+                document.getElementById('voiceIndicator').remove();
+                alert('Voice neural interface error: ' + event.error);
+            };
+
+            recognition.onend = function() {
+                document.getElementById('voiceIndicator').remove();
+            };
+
+            recognition.start();
+        }
+
+        // Neural interface particles
+        function createNeuralParticles() {
+            for (let i = 0; i < 3; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: fixed;
+                    width: 4px;
+                    height: 4px;
+                    background: #00ffff;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 5;
+                    box-shadow: 0 0 10px #00ffff;
+                    left: ${Math.random() * 100}vw;
+                    top: 100vh;
+                    animation: particleRise ${5 + Math.random() * 5}s linear forwards;
+                `;
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 10000);
+            }
+        }
+
+        // Add particle rise animation
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+            @keyframes particleRise {
+                to {
+                    transform: translateY(-110vh) translateX(${Math.random() * 200 - 100}px);
+                    opacity: 0;
+                }
+            }
+            </style>
+        `);
+
+        // Create particles periodically
+        setInterval(createNeuralParticles, 2000);
+
+        console.log('%c🧠 Mind Composer Neural Interface Ready', 'color: #00ffff; font-size: 14px; font-weight: bold;');
+    </script>
+</body>
+</html>

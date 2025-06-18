@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Record Interface - JARVIS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 5vw 5vh;
+            animation: quantumFlow 20s linear infinite;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(5vw, 5vh); }
+        }
+
+        .record-container {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: clamp(20px, 4vh, 40px);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .neural-header {
+            text-align: center;
+            padding: clamp(20px, 4vh, 40px);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(15px, 3vh, 25px);
+            margin-bottom: clamp(20px, 4vh, 30px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 clamp(30px, 6vh, 50px) rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+        }
+
+        .neural-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .record-title {
+            font-size: clamp(24px, 5vh, 42px);
+            font-weight: 900;
+            margin-bottom: clamp(10px, 2vh, 15px);
+            color: #00ffff;
+            text-shadow: 0 0 clamp(15px, 3vh, 30px) #00ffff, 0 0 clamp(30px, 6vh, 60px) #0088ff;
+            letter-spacing: 3px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .record-subtitle {
+            font-size: clamp(12px, 2vh, 16px);
+            color: #00d4ff;
+            font-weight: 400;
+            letter-spacing: 1px;
+            font-family: 'Rajdhani', sans-serif;
+            z-index: 1;
+            position: relative;
+        }
+
+        .record-interface {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(15px, 3vh, 25px);
+            padding: clamp(30px, 6vh, 50px);
+            text-align: center;
+            box-shadow: 0 0 clamp(30px, 6vh, 50px) rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+            margin-bottom: clamp(20px, 4vh, 30px);
+        }
+
+        .record-orb {
+            width: clamp(180px, 25vh, 250px);
+            height: clamp(180px, 25vh, 250px);
+            border: 4px solid #00ffff;
+            border-radius: 50%;
+            margin: clamp(20px, 4vh, 30px) auto;
+            position: relative;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.2), transparent);
+            box-shadow: 0 0 clamp(40px, 8vh, 60px) rgba(0, 255, 255, 0.6);
+            animation: recordPulse 2s ease-in-out infinite;
+        }
+
+        .record-orb::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: orbRotate 3s linear infinite;
+        }
+
+        .record-orb::after {
+            content: '🎤';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(50px, 10vh, 80px);
+            animation: micPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes recordPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes orbRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes micPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .neural-status {
+            margin: clamp(20px, 4vh, 30px) 0;
+            padding: clamp(15px, 3vh, 25px);
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00d4ff;
+            border-radius: clamp(10px, 2vh, 15px);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-text {
+            font-size: clamp(14px, 2.5vh, 18px);
+            margin: clamp(8px, 1.5vh, 12px) 0;
+            color: #00d4ff;
+            font-weight: 600;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .instructions {
+            max-width: 600px;
+            margin: clamp(20px, 4vh, 30px) auto;
+            padding: clamp(15px, 3vh, 25px);
+            background: rgba(0, 30, 60, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: clamp(10px, 2vh, 15px);
+            backdrop-filter: blur(15px);
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            margin: clamp(8px, 1.5vh, 12px) 0;
+            font-size: clamp(12px, 2vh, 16px);
+            color: #00d4ff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+        }
+
+        .instruction-item::before {
+            content: '🔸';
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .record-btn {
+            background: linear-gradient(45deg, #ff4444, #ffff00, #44ff44);
+            background-size: 300% 100%;
+            border: none;
+            padding: clamp(15px, 3vh, 25px) clamp(30px, 6vw, 60px);
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: clamp(10px, 2vh, 20px);
+            font-size: clamp(14px, 2.5vh, 20px);
+            margin: clamp(15px, 3vh, 25px);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 clamp(20px, 4vh, 30px) rgba(255, 255, 0, 0.6);
+            animation: colorShift 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes colorShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .record-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .record-btn:hover::before {
+            left: 100%;
+        }
+
+        .record-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px clamp(30px, 6vh, 50px) rgba(255, 255, 0, 0.8);
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #333, #666);
+            border: 2px solid #00d4ff;
+            padding: clamp(10px, 2vh, 15px) clamp(20px, 4vw, 35px);
+            color: #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: clamp(8px, 1.5vh, 12px);
+            text-decoration: none;
+            display: inline-block;
+            font-size: clamp(12px, 2vh, 16px);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(45deg, #00d4ff, #0088ff);
+            color: #000;
+            box-shadow: 0 0 clamp(15px, 3vh, 25px) #00ffff;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .record-container {
+                padding: 15px;
+            }
+            
+            .neural-header {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .record-interface {
+                padding: 25px;
+            }
+            
+            .instructions {
+                margin: 20px auto;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+    
+    <div class="record-container">
+        <div class="neural-header">
+            <h1 class="record-title">Neural Record Interface</h1>
+            <p class="record-subtitle">Advanced Voice Processing & AI Analysis System</p>
+        </div>
+        
+        <div class="record-interface">
+            <div class="record-orb"></div>
+            
+            <div class="neural-status">
+                <div class="status-text">🤖 JARVIS Neural Interface Ready</div>
+                <div class="status-text">🔊 Interactive Conversation Mode Active</div>
+                <div class="status-text">⚡ Real-time Analysis Enabled</div>
+            </div>
+            
+            <div class="instructions">
+                <div class="instruction-item">Click to start interactive recording session</div>
+                <div class="instruction-item">JARVIS will greet you and ask questions</div>
+                <div class="instruction-item">Speak naturally - AI will respond back</div>
+                <div class="instruction-item">Session includes real-time analysis</div>
+                <div class="instruction-item">Complete conversation will be saved</div>
+            </div>
+            
+            <form action="/process-record" method="POST">
+                <button type="submit" class="record-btn">Initiate Neural Session</button>
+            </form>
+            
+            <a href="/" class="back-btn">← Return to Interface</a>
+        </div>
+    </div>
+</body>
+</html>

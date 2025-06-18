@@ -1,0 +1,9 @@
+flask==3.0.0
+python-dotenv==1.0.0
+requests==2.31.0
+SpeechRecognition==3.10.0
+pyttsx3==2.90
+Werkzeug==3.0.1
+pydub==0.25.1
+openai
+reportlab

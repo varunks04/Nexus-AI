@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Sync Interface - JARVIS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: quantumFlow 20s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .lightning-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .lightning-branch {
+            stroke: #00ffff;
+            stroke-width: 2;
+            fill: none;
+            opacity: 0;
+            filter: drop-shadow(0 0 10px #00ffff);
+        }
+
+        @keyframes lightningFlash {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            20% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        .sync-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .neural-header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+        }
+
+        .neural-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .sync-title {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 30px #00ffff, 0 0 60px #0088ff;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .sync-subtitle {
+            font-size: 1.2em;
+            color: #00d4ff;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .sync-orb {
+            width: 120px;
+            height: 120px;
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            margin: 20px auto;
+            position: relative;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.2), transparent);
+            animation: syncPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.6);
+        }
+
+        .sync-orb::after {
+            content: '🔄';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            animation: syncRotate 3s linear infinite;
+        }
+
+        @keyframes syncPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes syncRotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .sync-status {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sync-status::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .sync-status.success {
+            border-color: #00ff00;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+
+        .sync-status.success::after {
+            content: '✅';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2em;
+        }
+
+        .sync-status.error {
+            border-color: #ff4444;
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.5);
+        }
+
+        .sync-status.error::after {
+            content: '❌';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2em;
+        }
+
+        .sync-status.pending {
+            border-color: #ffff00;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+        }
+
+        .sync-status.pending::after {
+            content: '⏳';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2em;
+            animation: statusPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-title {
+            font-size: 1.8em;
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 0 0 15px #00ffff;
+        }
+
+        .status-text {
+            font-size: 1.2em;
+            color: #88ccff;
+            font-weight: 600;
+        }
+
+        .progress-section {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(15px);
+        }
+
+        .progress-title {
+            font-size: 1.6em;
+            color: #00ffff;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 0 0 15px #00ffff;
+            text-align: center;
+        }
+
+        .neural-progress {
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 25px;
+            height: 40px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 15px;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3) inset;
+        }
+
+        .neural-progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #00ffff, #0088ff, #00d4ff);
+            background-size: 400% 100%;
+            animation: progressFlow 2s ease-in-out infinite;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 700;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1em;
+            border-radius: 23px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        @keyframes progressFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .progress-details {
+            text-align: center;
+            color: #88ccff;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .data-card {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.2);
+            backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .data-card:hover::before {
+            left: 100%;
+        }
+
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 255, 255, 0.4);
+            border-color: #00ffff;
+        }
+
+        .data-card-title {
+            font-size: 1.4em;
+            color: #00ffff;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 0 0 15px #00ffff;
+        }
+
+        .data-card-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .data-stat {
+            margin-bottom: 10px;
+        }
+
+        .data-label {
+            color: #88ccff;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .data-value {
+            color: #00ffff;
+            font-size: 1.2em;
+            font-weight: 700;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .control-panel {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(15px);
+        }
+
+        .control-title {
+            font-size: 1.8em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-shadow: 0 0 15px #00ffff;
+            text-align: center;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .neural-btn {
+            background: linear-gradient(45deg, #ff4444, #ffff00, #44ff44);
+            background-size: 300% 100%;
+            border: none;
+            padding: 15px 25px;
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 15px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 25px rgba(255, 255, 0, 0.5);
+            animation: colorShift 3s ease-in-out infinite;
+        }
+
+        @keyframes colorShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .neural-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 255, 0, 0.7);
+        }
+
+        .neural-btn.secondary {
+            background: linear-gradient(45deg, #333, #666, #999);
+            box-shadow: 0 0 25px rgba(153, 153, 153, 0.5);
+            animation: none;
+        }
+
+        .neural-btn.secondary:hover {
+            box-shadow: 0 8px 30px rgba(153, 153, 153, 0.7);
+        }
+
+        .settings-panel {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(15px);
+        }
+
+        .settings-title {
+            font-size: 1.8em;
+            color: #00ffff;
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-shadow: 0 0 15px #00ffff;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: #00ffff;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .form-select {
+            width: 100%;
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #00ffff;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 30, 60, 0.9);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(0, 30, 60, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-group:hover {
+            background: rgba(0, 50, 100, 0.6);
+            border-color: #00d4ff;
+        }
+
+        .form-checkbox {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            accent-color: #00ffff;
+        }
+
+        .checkbox-label {
+            color: #88ccff;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 30, 60, 0.9);
+            border: 2px solid #00d4ff;
+            color: #00ffff;
+            padding: 15px 20px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(45deg, #00d4ff, #0088ff);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.6);
+            text-decoration: none;
+        }
+
+        .quantum-time {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 30, 60, 0.9);
+            border: 2px solid #00d4ff;
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 1em;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sync-container {
+                padding: 15px;
+            }
+
+            .sync-title {
+                font-size: 2.5em;
+            }
+
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 10px 15px;
+            }
+
+            .quantum-time {
+                bottom: 10px;
+                right: 10px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+    
+    <!-- Lightning SVG Container -->
+    <svg class="lightning-container" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <!-- Lightning paths will be generated by JavaScript -->
+    </svg>
+
+    <!-- Back Button -->
+    <a href="/" class="back-btn">← Neural Interface</a>
+
+    <div class="sync-container">
+        <!-- Neural Header -->
+        <header class="neural-header">
+            <div class="sync-orb"></div>
+            <h1 class="sync-title">Quantum Sync Interface</h1>
+            <p class="sync-subtitle">Neural Network Synchronization • Data Matrix • Cloud Nexus</p>
+        </header>
+
+        <!-- Sync Status -->
+        <div class="sync-status pending" id="syncStatus">
+            <h2 class="status-title">Sync Status</h2>
+            <p class="status-text">Last sync: <span id="lastSync">Never</span></p>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <h3 class="progress-title">⚡ Synchronization Progress</h3>
+            <div class="neural-progress">
+                <div class="neural-progress-bar" style="width: 0%" id="syncProgress">0%</div>
+            </div>
+            <div class="progress-details" id="syncDetails">No sync in progress</div>
+        </div>
+
+        <!-- Data Grid -->
+        <div class="data-grid">
+            <div class="data-card">
+                <span class="data-card-icon">💾</span>
+                <h3 class="data-card-title">Local Neural Data</h3>
+                <div class="data-stat">
+                    <div class="data-label">Entries:</div>
+                    <div class="data-value" id="localEntries">0</div>
+                </div>
+                <div class="data-stat">
+                    <div class="data-label">Last Updated:</div>
+                    <div class="data-value" id="localLastUpdate">Never</div>
+                </div>
+            </div>
+            <div class="data-card">
+                <span class="data-card-icon">☁️</span>
+                <h3 class="data-card-title">Cloud Neural Data</h3>
+                <div class="data-stat">
+                    <div class="data-label">Entries:</div>
+                    <div class="data-value" id="cloudEntries">0</div>
+                </div>
+                <div class="data-stat">
+                    <div class="data-label">Last Updated:</div>
+                    <div class="data-value" id="cloudLastUpdate">Never</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h3 class="control-title">🎛️ Sync Control Interface</h3>
+            <div class="button-grid">
+                <button class="neural-btn" onclick="startSync()">Initiate Sync</button>
+                <button class="neural-btn secondary" onclick="checkStatus()">Status Check</button>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <h3 class="settings-title">⚙️ Sync Configuration Matrix</h3>
+            <form id="syncSettings">
+                <div class="form-group">
+                    <label class="form-label">Sync Frequency Protocol:</label>
+                    <select class="form-select" name="syncFrequency">
+                        <option value="manual">Manual Only</option>
+                        <option value="hourly">Hourly Neural Sync</option>
+                        <option value="daily">Daily Data Matrix</option>
+                        <option value="weekly">Weekly Archive Sync</option>
+                    </select>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input class="form-checkbox" type="checkbox" id="autoSync" name="autoSync">
+                    <label class="checkbox-label" for="autoSync">
+                        Enable automatic neural synchronization
+                    </label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input class="form-checkbox" type="checkbox" id="syncOnClose" name="syncOnClose">
+                    <label class="checkbox-label" for="syncOnClose">
+                        Sync on neural interface closure
+                    </label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input class="form-checkbox" type="checkbox" id="realTimeSync" name="realTimeSync">
+                    <label class="checkbox-label" for="realTimeSync">
+                        Real-time quantum synchronization
+                    </label>
+                </div>
+                
+                <button type="submit" class="neural-btn">Save Configuration</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quantum Time Display -->
+    <div class="quantum-time" id="quantumTime"></div>
+
+    <script>
+        class LightningSystem {
+            constructor() {
+                this.svg = document.querySelector('.lightning-container');
+            }
+
+            createLightningPath() {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const startX = Math.random() * 100;
+                const startY = 0;
+                const endX = Math.random() * 100;
+                const endY = 100;
+
+                const midX1 = startX + (Math.random() - 0.5) * 30;
+                const midY1 = 25 + Math.random() * 25;
+                const midX2 = endX + (Math.random() - 0.5) * 30;
+                const midY2 = 50 + Math.random() * 25;
+
+                const d = `M ${startX} ${startY} Q ${midX1} ${midY1} ${midX2} ${midY2} T ${endX} ${endY}`;
+                
+                path.setAttribute('d', d);
+                path.classList.add('lightning-branch');
+                path.style.animation = `lightningFlash ${0.5 + Math.random() * 0.5}s ease-out`;
+
+                this.svg.appendChild(path);
+
+                setTimeout(() => {
+                    if (this.svg.contains(path)) {
+                        this.svg.removeChild(path);
+                    }
+                }, 1000);
+            }
+        }
+
+        // Initialize lightning system
+        const lightningSystem = new LightningSystem();
+
+        // Sync functions
+        function startSync() {
+            const status = document.getElementById('syncStatus');
+            const progress = document.getElementById('syncProgress');
+            const details = document.getElementById('syncDetails');
+
+            status.className = 'sync-status pending';
+            status.innerHTML = '<h2 class="status-title">Sync Status</h2><p class="status-text">Neural synchronization in progress...</p>';
+            
+            // Lightning effect for sync start
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => lightningSystem.createLightningPath(), i * 200);
+            }
+            
+            fetch('/start-sync', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateProgress(data.progress);
+                    
+                    // Simulate progressive sync
+                    let currentProgress = 0;
+                    const interval = setInterval(() => {
+                        currentProgress += Math.random() * 20;
+                        if (currentProgress >= 100) {
+                            currentProgress = 100;
+                            clearInterval(interval);
+                            status.className = 'sync-status success';
+                            status.innerHTML = '<h2 class="status-title">Sync Status</h2><p class="status-text">Neural synchronization complete ✅</p>';
+                            details.textContent = 'Quantum sync successful - All neural data synchronized';
+                            
+                            // Success lightning burst
+                            for (let i = 0; i < 5; i++) {
+                                setTimeout(() => lightningSystem.createLightningPath(), i * 100);
+                            }
+                        }
+                        updateProgress(Math.min(currentProgress, 100));
+                    }, 500);
+                } else {
+                    status.className = 'sync-status error';
+                    status.innerHTML = `<h2 class="status-title">Sync Status</h2><p class="status-text">Error: ${data.message}</p>`;
+                }
+            })
+            .catch(error => {
+                status.className = 'sync-status error';
+                status.innerHTML = `<h2 class="status-title">Sync Status</h2><p class="status-text">Neural link error: ${error.message}</p>`;
+            });
+        }
+
+        function updateProgress(progress) {
+            const progressBar = document.getElementById('syncProgress');
+            const details = document.getElementById('syncDetails');
+            
+            progressBar.style.width = `${progress}%`;
+            progressBar.textContent = `${Math.round(progress)}%`;
+            
+            if (progress < 100) {
+                details.textContent = `Syncing neural patterns... ${Math.round(progress)}% complete`;
+            }
+        }
+
+        function checkStatus() {
+            // Lightning effect for status check
+            lightningSystem.createLightningPath();
+            
+            fetch('/sync-status')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('lastSync').textContent = data.lastSync || 'Never';
+                document.getElementById('localEntries').textContent = data.localEntries || '0';
+                document.getElementById('cloudEntries').textContent = data.cloudEntries || '0';
+                document.getElementById('localLastUpdate').textContent = data.localLastUpdate || 'Never';
+                document.getElementById('cloudLastUpdate').textContent = data.cloudLastUpdate || 'Never';
+                
+                // Update status based on data
+                const status = document.getElementById('syncStatus');
+                if (data.lastSync && data.lastSync !== 'Never') {
+                    status.className = 'sync-status success';
+                    status.innerHTML = `<h2 class="status-title">Sync Status</h2><p class="status-text">Last sync: ${data.lastSync}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Status check failed:', error);
+            });
+        }
+
+        // Enhanced time display
+        function updateQuantumTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const dateString = now.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit'
+            });
+            
+            document.getElementById('quantumTime').innerHTML = `
+                <div style="font-size: 1.1em;">${timeString}</div>
+                <div style="font-size: 0.8em; opacity: 0.8;">${dateString}</div>
+                <div style="font-size: 0.6em; opacity: 0.6;">SYNC TIME</div>
+            `;
+        }
+
+        // Settings form handler
+        document.getElementById('syncSettings').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // Lightning effect for settings save
+            for (let i = 0; i < 2; i++) {
+                setTimeout(() => lightningSystem.createLightningPath(), i * 150);
+            }
+            
+            fetch('/update-sync-settings', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Visual feedback for successful save
+                    const btn = this.querySelector('.neural-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Configuration Saved ✅';
+                    btn.style.background = 'linear-gradient(45deg, #00ff00, #44ff44)';
+                    
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.background = '';
+                    }, 2000);
+                } else {
+                    alert('⚠️ Error updating sync configuration');
+                }
+            })
+            .catch(error => {
+                console.error('Settings save failed:', error);
+                alert('❌ Neural link error occurred while saving settings');
+            });
+        });
+
+        // Interactive elements
+        document.querySelectorAll('.data-card, .neural-btn').forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                if (Math.random() > 0.7) {
+                    lightningSystem.createLightningPath();
+                }
+            });
+        });
+
+        // Mouse interaction for lightning
+        document.addEventListener('mousemove', (e) => {
+            if (Math.random() > 0.995) {
+                lightningSystem.createLightningPath();
+            }
+        });
+
+        // Initialize all systems
+        updateQuantumTime();
+        setInterval(updateQuantumTime, 1000);
+        checkStatus(); // Check status on page load
+
+        // Boot sequence
+        setTimeout(() => {
+            console.log('%c🔄 QUANTUM SYNC INTERFACE READY', 'color: #00ffff; font-size: 14px; font-weight: bold;');
+        }, 1000);
+    </script>
+</body>
+</html>

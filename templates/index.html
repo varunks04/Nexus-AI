@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS Neural Interface - NEXUS PROTOCOL v2.0</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+            min-width: 320px;
+        }
+
+        /* Quantum Grid Background */
+        .quantum-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 5vw 5vh;
+            animation: quantumFlow 20s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(5vw, 5vh); }
+        }
+
+        /* Enhanced Lightning Container */
+        .lightning-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .lightning-branch {
+            stroke: #00ffff;
+            stroke-width: 2;
+            fill: none;
+            filter: url(#glow);
+            opacity: 0;
+            animation: lightningFlash 0.6s ease-out forwards;
+        }
+
+        .lightning-branch.secondary {
+            stroke: #ff00ff;
+            stroke-width: 1.5;
+            filter: url(#pinkGlow);
+        }
+
+        .lightning-branch.tertiary {
+            stroke: #ffff00;
+            stroke-width: 1;
+            filter: url(#yellowGlow);
+        }
+
+        @keyframes lightningFlash {
+            0% { opacity: 0; stroke-width: 0; }
+            20% { opacity: 1; stroke-width: 6; }
+            100% { opacity: 0.3; stroke-width: 1; }
+        }
+
+        /* Lightning Control Panel - Responsive positioning */
+        .lightning-controls {
+            position: fixed;
+            bottom: 2vh;
+            right: 2vw;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 1vh;
+        }
+
+        .lightning-btn {
+            background: linear-gradient(45deg, #ff4444, #ffff00);
+            border: none;
+            padding: clamp(8px, 1.5vh, 15px) clamp(12px, 2vw, 25px);
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 0.8vh;
+            font-size: clamp(10px, 1.2vh, 16px);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            box-shadow: 0 0 1.5vh rgba(255, 255, 0, 0.5);
+            white-space: nowrap;
+        }
+
+        .lightning-btn:hover {
+            box-shadow: 0 0 2.5vh #ffff00;
+            transform: translateY(-0.3vh) scale(1.05);
+        }
+
+        .lightning-btn.auto-off {
+            background: linear-gradient(45deg, #666666, #999999);
+            box-shadow: 0 0 1vh rgba(153, 153, 153, 0.5);
+        }
+
+        /* Holographic Particles */
+        .holo-particle {
+            position: absolute;
+            width: 0.3vh;
+            height: 0.3vh;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 1vh #00ffff;
+            animation: particleFloat 15s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(30vw); opacity: 0; }
+        }
+
+        /* Main Neural Interface Layout - Fully Responsive */
+        .neural-interface {
+            display: grid;
+            grid-template-columns: minmax(220px, 22vw) 1fr minmax(220px, 22vw);
+            grid-template-rows: minmax(80px, 12vh) 1fr minmax(80px, 12vh);
+            grid-template-areas:
+                "header header header"
+                "left-panel main-core right-panel"
+                "footer footer footer";
+            height: 100vh;
+            gap: clamp(10px, 1.5vh, 20px);
+            padding: clamp(10px, 1.5vh, 20px);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Enhanced Header */
+        .quantum-header {
+            grid-area: header;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(12px, 2vh, 25px);
+            padding: clamp(15px, 2vh, 30px) clamp(20px, 3vw, 40px);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 clamp(20px, 4vh, 50px) rgba(0, 212, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quantum-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .neural-logo {
+            display: flex;
+            align-items: center;
+            gap: clamp(10px, 2vw, 25px);
+            z-index: 1;
+        }
+
+        .core-orb {
+            width: clamp(40px, 6vh, 70px);
+            height: clamp(40px, 6vh, 70px);
+            background: radial-gradient(circle at 30% 30%, #ffffff, #00ffff, #0080ff);
+            border-radius: 50%;
+            position: relative;
+            animation: orbPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 clamp(15px, 3vh, 40px) #00ffff;
+        }
+
+        .core-orb::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: orbRotate 3s linear infinite;
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes orbRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .system-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(16px, 3vh, 32px);
+            font-weight: 700;
+            color: #00ffff;
+            text-shadow: 0 0 clamp(10px, 2vh, 25px) #00ffff;
+            letter-spacing: 0.2em;
+        }
+
+        .neural-stats {
+            display: flex;
+            gap: clamp(10px, 2vw, 25px);
+            z-index: 1;
+        }
+
+        .stat-module {
+            background: rgba(0, 255, 255, 0.15);
+            border: 1px solid #00d4ff;
+            padding: clamp(8px, 1.5vh, 15px) clamp(12px, 2vw, 25px);
+            border-radius: clamp(8px, 1.5vh, 18px);
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            animation: statGlow 2s ease-in-out infinite alternate;
+        }
+
+        .stat-value {
+            font-size: clamp(12px, 2vh, 20px);
+            font-weight: 700;
+            color: #00ff00;
+        }
+
+        .stat-label {
+            font-size: clamp(8px, 1vh, 12px);
+            color: #00d4ff;
+            margin-top: 2px;
+        }
+
+        @keyframes statGlow {
+            0% { box-shadow: 0 0 clamp(8px, 1.5vh, 15px) rgba(0, 255, 255, 0.3); }
+            100% { box-shadow: 0 0 clamp(12px, 2vh, 25px) rgba(0, 255, 255, 0.6); }
+        }
+
+        /* Enhanced Left Panel */
+        .left-panel {
+            grid-area: left-panel;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2vh, 20px);
+        }
+
+        .chrono-module {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(12px, 2vh, 22px);
+            padding: clamp(15px, 3vh, 30px);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 clamp(15px, 3vh, 35px) rgba(0, 212, 255, 0.4);
+        }
+
+        .chrono-module::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            animation: chronoScan 4s linear infinite;
+        }
+
+        @keyframes chronoScan {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .neural-time {
+            font-size: clamp(20px, 4vh, 38px);
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 clamp(10px, 2vh, 25px) #00ffff;
+            margin-bottom: clamp(5px, 1vh, 12px);
+            z-index: 1;
+            position: relative;
+        }
+
+        .neural-date {
+            font-size: clamp(12px, 2vh, 18px);
+            font-weight: 600;
+            color: #00d4ff;
+            font-family: 'Rajdhani', sans-serif;
+            z-index: 1;
+            position: relative;
+        }
+
+        .quantum-reactor {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(12px, 2vh, 22px);
+            padding: clamp(15px, 3vh, 30px);
+            text-align: center;
+            position: relative;
+        }
+
+        .reactor-core {
+            width: clamp(80px, 15vh, 140px);
+            height: clamp(80px, 15vh, 140px);
+            margin: 0 auto clamp(10px, 2vh, 25px);
+            background: radial-gradient(circle, #00ffff 0%, #0080ff 40%, #003366 80%);
+            border-radius: 50%;
+            position: relative;
+            animation: reactorPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 clamp(25px, 5vh, 60px) #00ffff;
+        }
+
+        .reactor-core::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle, #ffffff, #00ffff);
+            border-radius: 50%;
+            animation: coreFlicker 1s ease-in-out infinite;
+        }
+
+        .reactor-core::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: reactorRing 3s linear infinite;
+        }
+
+        @keyframes reactorPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes coreFlicker {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes reactorRing {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .power-level {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(12px, 2vh, 18px);
+            font-weight: 700;
+            color: #00ff00;
+            margin-bottom: clamp(8px, 1.5vh, 15px);
+        }
+
+        .energy-bar {
+            width: 100%;
+            height: clamp(6px, 1vh, 12px);
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: clamp(5px, 1vh, 12px);
+            overflow: hidden;
+        }
+
+        .energy-fill {
+            height: 100%;
+            width: 92%;
+            background: linear-gradient(90deg, #00ff00, #00ffff);
+            border-radius: clamp(5px, 1vh, 12px);
+            animation: energyFlow 2s ease-in-out infinite;
+        }
+
+        @keyframes energyFlow {
+            0%, 100% { box-shadow: 0 0 clamp(8px, 1.5vh, 15px) #00ffff; }
+            50% { box-shadow: 0 0 clamp(12px, 2vh, 25px) #00ffff; }
+        }
+
+        .neural-actions {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(8px, 1.5vh, 15px);
+        }
+
+        .action-module {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            padding: clamp(10px, 2vh, 18px) clamp(12px, 2vw, 25px);
+            border-radius: clamp(8px, 1.5vh, 15px);
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: clamp(10px, 1.5vh, 16px);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-module:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(0, 150, 255, 0.15));
+            box-shadow: 0 0 clamp(15px, 3vh, 35px) rgba(0, 212, 255, 0.7);
+            transform: translateY(-0.5vh);
+            border-color: #00ffff;
+        }
+
+        .action-module::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-module:hover::before {
+            left: 100%;
+        }
+
+        /* Holographic Central Core */
+        .holographic-core {
+            grid-area: main-core;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .holo-display {
+            width: clamp(300px, 50vw, 550px);
+            height: clamp(250px, 45vh, 450px);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 3px solid #00d4ff;
+            border-radius: clamp(15px, 3vh, 30px);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(25px);
+            box-shadow:
+                0 0 clamp(30px, 6vh, 70px) rgba(0, 212, 255, 0.4),
+                inset 0 0 clamp(30px, 6vh, 70px) rgba(0, 212, 255, 0.1);
+        }
+
+        .holo-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg,
+                transparent 30%,
+                rgba(0, 255, 255, 0.15) 50%,
+                transparent 70%);
+            animation: holoSweep 4s linear infinite;
+        }
+
+        @keyframes holoSweep {
+            0% { transform: translateX(-100%) skewX(-15deg); }
+            100% { transform: translateX(100%) skewX(-15deg); }
+        }
+
+        .neural-core {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: clamp(30px, 6vh, 60px);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ai-consciousness {
+            width: clamp(100px, 20vh, 160px);
+            height: clamp(100px, 20vh, 160px);
+            margin-bottom: clamp(20px, 4vh, 35px);
+            background: radial-gradient(circle,
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(0, 255, 255, 0.8) 30%,
+                rgba(0, 150, 255, 0.6) 60%,
+                transparent 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(40px, 8vh, 70px);
+            font-weight: 900;
+            color: #000000;
+            animation: consciousnessPulse 3s ease-in-out infinite;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .ai-consciousness::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            border-right-color: transparent;
+            animation: consciousnessRotate 5s linear infinite;
+        }
+
+        .ai-consciousness::after {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: -25px;
+            right: -25px;
+            bottom: -25px;
+            border: 2px solid #ff00ff;
+            border-radius: 50%;
+            border-bottom-color: transparent;
+            border-left-color: transparent;
+            animation: consciousnessRotate 7s linear infinite reverse;
+        }
+
+        @keyframes consciousnessPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 clamp(25px, 5vh, 60px) rgba(0, 255, 255, 0.6);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 clamp(40px, 8vh, 90px) rgba(0, 255, 255, 0.9);
+            }
+        }
+
+        @keyframes consciousnessRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .interface-header {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(20px, 4vh, 36px);
+            font-weight: 700;
+            color: #00ffff;
+            text-shadow: 0 0 clamp(10px, 2vh, 25px) #00ffff;
+            margin-bottom: clamp(10px, 2vh, 18px);
+            letter-spacing: 0.15em;
+        }
+
+        .neural-status {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(10px, 1.5vh, 16px);
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: clamp(15px, 3vh, 30px);
+        }
+
+        .consciousness-metrics {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: clamp(15px, 3vh, 25px);
+        }
+
+        .metric-display {
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .metric-number {
+            font-size: clamp(14px, 2.5vh, 24px);
+            font-weight: 700;
+            color: #00ff00;
+            text-shadow: 0 0 clamp(8px, 1.5vh, 15px) #00ff00;
+        }
+
+        .metric-title {
+            font-size: clamp(8px, 1vh, 12px);
+            color: #00d4ff;
+            margin-top: 0.5vh;
+            text-transform: uppercase;
+        }
+
+        /* Enhanced Right Panel */
+        .right-panel {
+            grid-area: right-panel;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2vh, 20px);
+        }
+
+        .neural-access {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(12px, 2vh, 22px);
+            padding: clamp(15px, 3vh, 25px);
+            box-shadow: 0 0 clamp(15px, 3vh, 35px) rgba(0, 212, 255, 0.3);
+        }
+
+        .panel-title {
+            margin-bottom: clamp(10px, 2vh, 20px);
+            color: #00ffff;
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(12px, 2vh, 18px);
+            font-weight: 700;
+            text-shadow: 0 0 clamp(8px, 1.5vh, 15px) #00ffff;
+        }
+
+        .neural-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: clamp(8px, 1.5vh, 15px) clamp(10px, 2vw, 20px);
+            margin: clamp(5px, 1vh, 10px) 0;
+            background: rgba(0, 255, 255, 0.08);
+            border: 1px solid #00d4ff;
+            border-radius: clamp(6px, 1vh, 12px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: clamp(10px, 1.5vh, 14px);
+        }
+
+        .neural-item:hover {
+            background: rgba(0, 255, 255, 0.15);
+            transform: translateX(0.5vw);
+            box-shadow: 0 0 clamp(10px, 2vh, 25px) rgba(0, 212, 255, 0.5);
+        }
+
+        .neural-indicator {
+            width: clamp(8px, 1vh, 12px);
+            height: clamp(8px, 1vh, 12px);
+            border-radius: 50%;
+            background: #00ff00;
+            box-shadow: 0 0 clamp(8px, 1.5vh, 15px) #00ff00;
+            animation: indicatorPulse 2s ease-in-out infinite;
+        }
+
+        .neural-indicator.warning {
+            background: #ffff00;
+            box-shadow: 0 0 clamp(8px, 1.5vh, 15px) #ffff00;
+        }
+
+        .neural-indicator.critical {
+            background: #ff0080;
+            box-shadow: 0 0 clamp(8px, 1.5vh, 15px) #ff0080;
+        }
+
+        @keyframes indicatorPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Enhanced Bottom Panel */
+        .quantum-footer {
+            grid-area: footer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(15px, 3vw, 35px);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: clamp(12px, 2vh, 25px);
+            padding: clamp(15px, 3vh, 30px);
+            box-shadow: 0 0 clamp(20px, 4vh, 50px) rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(20px);
+        }        .quantum-module {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(5px, 1vh, 10px);
+            padding: clamp(10px, 2vh, 18px) clamp(15px, 3vw, 30px);
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00d4ff;
+            border-radius: clamp(8px, 1.5vh, 18px);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: clamp(8px, 1.2vh, 14px);
+            text-transform: uppercase;
+            color: #87CEEB;
+        }
+
+        .quantum-module:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 clamp(15px, 3vh, 30px) rgba(0, 212, 255, 0.6);
+            transform: translateY(-0.5vh);
+        }
+
+        .module-symbol {
+            width: clamp(20px, 4vh, 35px);
+            height: clamp(20px, 4vh, 35px);
+            background: linear-gradient(45deg, #00d4ff, #00ffff);
+            border-radius: clamp(4px, 1vh, 10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(12px, 2vh, 20px);
+            color: #000;
+            animation: symbolGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes symbolGlow {
+            0%, 100% { box-shadow: 0 0 clamp(8px, 1.5vh, 15px) #00d4ff; }
+            50% { box-shadow: 0 0 clamp(12px, 2vh, 25px) #00ffff; }
+        }
+
+        /* Enhanced Energy Particles */
+        .energy-particle {
+            position: absolute;
+            width: clamp(3px, 0.5vh, 6px);
+            height: clamp(3px, 0.5vh, 6px);
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 clamp(8px, 1.5vh, 15px) #00ffff;
+            animation: energyFlow 5s linear infinite;
+            pointer-events: none;
+        }
+
+        .neural-particle {
+            position: absolute;
+            width: clamp(2px, 0.3vh, 4px);
+            height: clamp(2px, 0.3vh, 4px);
+            background: #ff00ff;
+            border-radius: 50%;
+            box-shadow: 0 0 clamp(6px, 1vh, 12px) #ff00ff;
+            animation: neuralFlow 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes energyFlow {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+        }
+
+        @keyframes neuralFlow {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .neural-interface {
+                grid-template-columns: minmax(180px, 25vw) 1fr minmax(180px, 25vw);
+                gap: 1vh;
+                padding: 1vh;
+            }
+
+            .lightning-controls {
+                bottom: 1vh;
+                right: 1vw;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .neural-interface {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr auto auto;
+                grid-template-areas:
+                    "header"
+                    "left-panel"
+                    "main-core"
+                    "right-panel"
+                    "footer";
+            }
+
+            .neural-stats {
+                flex-wrap: wrap;
+                gap: 1vh;
+            }
+
+            .stat-module {
+                min-width: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .system-title {
+                font-size: 16px;
+                letter-spacing: 0.1em;
+            }
+
+            .neural-logo {
+                gap: 10px;
+            }
+
+            .quantum-footer {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+
+    <!-- Enhanced Lightning SVG Container -->
+    <svg class="lightning-container" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+            <filter id="pinkGlow">
+                <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+            <filter id="yellowGlow">
+                <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Enhanced Lightning Control Panel -->
+    <div class="lightning-controls">
+        <button class="lightning-btn" id="autoToggle" onclick="toggleContinuousLightning()">🔥 AUTO ON</button>
+        <button class="lightning-btn" onclick="triggerLightningBurst()">⚡ BURST</button>
+        <button class="lightning-btn" onclick="triggerMegaStrike()">💥 MEGA</button>
+    </div>
+
+    <div class="neural-interface">
+        <!-- Quantum Header -->
+        <div class="quantum-header">
+            <div class="neural-logo">
+                <div class="core-orb"></div>
+                <div class="system-title">NEXUS PROTOCOL</div>
+            </div>
+            <div class="neural-stats">
+                <div class="stat-module">
+                    <div class="stat-value">98%</div>
+                    <div class="stat-label">NEURAL SYNC</div>
+                </div>
+                <div class="stat-module">
+                    <div class="stat-value">ONLINE</div>
+                    <div class="stat-label">AI STATUS</div>
+                </div>
+                <div class="stat-module">
+                    <div class="stat-value">STABLE</div>
+                    <div class="stat-label">QUANTUM</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <div class="chrono-module">
+                <div class="neural-time" id="quantum-time">12:41:47</div>
+                <div class="neural-date" id="quantum-date">JUN 17, 2025</div>
+            </div>
+
+            <div class="quantum-reactor">
+                <div class="reactor-core"></div>
+                <div class="power-level">QUANTUM CORE: 92%</div>
+                <div class="energy-bar">
+                    <div class="energy-fill"></div>
+                </div>
+            </div>
+
+            <div class="neural-actions">
+                <!-- Replace the action-module buttons with these -->
+                <a href="/neural-record" class="action-module">🎤 Neural Record</a>
+                <a href="/quantum-input" class="action-module">📝 Quantum Input</a>
+                <a href="/memory-scan" class="action-module">🧠 Memory Scan</a>
+                <a href="/data-sync" class="action-module">⚡ Data Sync</a>
+                
+            </div>
+        </div>
+
+        <!-- Holographic Central Core -->
+        <div class="holographic-core">
+            <div class="holo-display">
+                <div class="neural-core">
+                    <div class="ai-consciousness" onclick="triggerConsciousnessLightning()">J</div>
+                    <div class="interface-header">NEURAL DIARY</div>
+                    <div class="neural-status">CONSCIOUSNESS INTERFACE ACTIVE</div>
+
+                    <div class="consciousness-metrics">
+                        <div class="metric-display">
+                            <div class="metric-number">99%</div>
+                            <div class="metric-title">AWARENESS</div>
+                        </div>
+                        <div class="metric-display">
+                            <div class="metric-number">47ms</div>
+                            <div class="metric-title">RESPONSE</div>
+                        </div>
+                        <div class="metric-display">
+                            <div class="metric-number">3.2TB</div>
+                            <div class="metric-title">MEMORY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="neural-access">
+                <h3 class="panel-title">NEURAL ACCESS</h3>
+                <div class="neural-item">
+                    <span>Memory Banks</span>
+                    <div class="neural-indicator"></div>
+                </div>
+                <div class="neural-item">
+                    <span>Emotion Matrix</span>
+                    <div class="neural-indicator"></div>
+                </div>
+                <div class="neural-item">
+                    <span>Thought Patterns</span>
+                    <div class="neural-indicator warning"></div>
+                </div>
+                <div class="neural-item">
+                    <span>Audio Logs</span>
+                    <div class="neural-indicator"></div>
+                </div>
+                <div class="neural-item">
+                    <span>Data Archives</span>
+                    <div class="neural-indicator"></div>
+                </div>
+            </div>
+
+            <div class="neural-access">
+                <h3 class="panel-title">SYSTEM STATUS</h3>
+                <div class="neural-item">
+                    <span>Neural Bridge</span>
+                    <div class="neural-indicator"></div>
+                </div>
+                <div class="neural-item">
+                    <span>Quantum AI</span>
+                    <div class="neural-indicator critical"></div>
+                </div>
+                <div class="neural-item">
+                    <span>Data Flow</span>
+                    <div class="neural-indicator"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantum Footer -->
+        <a href="/compose" class="quantum-module">
+            <div class="module-symbol">✎</div>
+            <span>Compose</span>
+        </a>
+        <a href="/analyze" class="quantum-module">
+            <div class="module-symbol">📊</div>
+            <span>Analyze</span>
+        </a>
+        <a href="/sync" class="quantum-module">
+            <div class="module-symbol">🔄</div>
+            <span>Sync</span>
+        </a>
+        <a href="/archive" class="quantum-module">
+            <div class="module-symbol">💾</div>
+            <span>Archive</span>
+        </a>        <a href="/export" class="quantum-module">
+            <div class="module-symbol">⚡</div>
+            <span>Export</span>
+        </a>
+        <a href="/bio" class="quantum-module">
+            <div class="module-symbol">🤖</div>
+            <span>Bio & Prompts</span>
+        </a>
+    </div>    <script>
+        // Session tracking for greetings
+        let sessionGreetingGiven = sessionStorage.getItem('jarvis_greeting_given') === 'true';
+
+        // Add greeting when page loads (only once per session)
+        window.addEventListener('load', async () => {
+            if (!sessionGreetingGiven) {
+                try {
+                    // Send startup greeting
+                    const response = await fetch('/speak-greeting', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            type: 'startup'
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        console.log('Startup greeting played:', result.voice_generated);
+                        // Mark greeting as given for this session
+                        sessionStorage.setItem('jarvis_greeting_given', 'true');
+                        sessionGreetingGiven = true;
+                    }
+                } catch (error) {
+                    console.error('Error playing startup greeting:', error);
+                }
+            } else {
+                console.log('Greeting already given in this session');
+            }
+        });
+
+        // Add navigation functionality to buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Action module buttons
+    const actionButtons = document.querySelectorAll('.action-module');
+    actionButtons.forEach((button, index) => {
+        button.addEventListener('click', function() {
+            const routes = ['/neural-record', '/quantum-input', '/memory-scan', '/data-sync'];
+            window.location.href = routes[index];
+        });
+    });
+
+    // Footer module buttons
+    const footerModules = document.querySelectorAll('.quantum-module');
+    footerModules.forEach((module, index) => {
+        module.addEventListener('click', function() {
+            const routes = ['/compose', '/analyze', '/sync', '/archive', '/export', '/bio'];
+            window.location.href = routes[index];
+        });
+    });
+});
+        class AdvancedLightningSystem {
+            constructor() {
+                this.svg = document.querySelector('.lightning-container');
+                this.centerX = 50;
+                this.centerY = 50;
+                this.continuousMode = true;
+                this.animationId = null;
+                this.intensity = 1;
+
+                this.init();
+            }
+
+            init() {
+                this.updateButtonState();
+                this.startAutomaticLightning();
+                this.createHoloParticles();
+                this.createEnergyParticles();
+                this.createNeuralParticles();
+            }
+
+            createLightningBranch(baseAngle, type = 'primary', startX = this.centerX, startY = this.centerY) {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.classList.add('lightning-branch', type);
+
+                const points = this.generateLightningPath(baseAngle, type, startX, startY);
+                const pathData = this.pointsToPath(points);
+
+                path.setAttribute('d', pathData);
+                this.svg.appendChild(path);
+
+                setTimeout(() => {
+                    if (path.parentNode) {
+                        path.parentNode.removeChild(path);
+                    }
+                }, 3000);
+
+                // Create secondary branches for primary lightning
+                if (type === 'primary' && Math.random() > 0.3) {
+                    setTimeout(() => {
+                        const branchPoint = points[Math.floor(points.length * (0.3 + Math.random() * 0.5))];
+                        this.createSecondaryBranches(branchPoint, baseAngle);
+                    }, 200);
+                }
+            }
+
+            generateLightningPath(angle, type, startX, startY) {
+                const points = [{x: startX, y: startY}];
+                let currentX = startX;
+                let currentY = startY;
+
+                const maxLength = type === 'primary' ? 45 : type === 'secondary' ? 25 : 15;
+                const segments = type === 'primary' ? 18 : type === 'secondary' ? 10 : 6;
+                const segmentLength = maxLength / segments;
+
+                for (let i = 0; i < segments; i++) {
+                    const deviation = (Math.random() - 0.5) * 0.8;
+                    const currentAngle = angle + deviation;
+
+                    const stepX = Math.cos(currentAngle) * segmentLength * (0.5 + Math.random() * 1.0);
+                    const stepY = Math.sin(currentAngle) * segmentLength * (0.5 + Math.random() * 1.0);
+
+                    currentX += stepX;
+                    currentY += stepY;
+
+                    // Add jagged variations
+                    if (i > 0 && Math.random() > 0.6) {
+                        const jagX = currentX + (Math.random() - 0.5) * 6;
+                        const jagY = currentY + (Math.random() - 0.5) * 6;
+                        points.push({x: jagX, y: jagY});
+                    }
+
+                    points.push({x: currentX, y: currentY});
+
+                    // Stop if out of bounds
+                    if (currentX < 0 || currentX > 100 || currentY < 0 || currentY > 100) {
+                        break;
+                    }
+                }
+
+                return points;
+            }
+
+            createSecondaryBranches(branchPoint, baseAngle) {
+                const numSecondary = Math.floor(Math.random() * 4) + 2;
+
+                for (let i = 0; i < numSecondary; i++) {
+                    const deviation = (Math.random() - 0.5) * Math.PI;
+                    const secondaryAngle = baseAngle + deviation;
+
+                    setTimeout(() => {
+                        this.createLightningBranch(secondaryAngle, 'secondary', branchPoint.x, branchPoint.y);
+
+                        // Tertiary branches
+                        if (Math.random() > 0.7) {
+                            setTimeout(() => {
+                                const tertiaryAngle = secondaryAngle + (Math.random() - 0.5) * Math.PI * 0.5;
+                                this.createLightningBranch(tertiaryAngle, 'tertiary', branchPoint.x, branchPoint.y);
+                            }, 300);
+                        }
+                    }, i * 100);
+                }
+            }
+
+            pointsToPath(points) {
+                if (points.length === 0) return '';
+                let path = `M ${points[0].x} ${points[0].y}`;
+                for (let i = 1; i < points.length; i++) {
+                    path += ` L ${points[i].x} ${points[i].y}`;
+                }
+                return path;
+            }
+
+            startAutomaticLightning() {
+                const animate = () => {
+                    if (this.continuousMode) {
+                        if (Math.random() > 0.5) {
+                            const randomAngle = Math.random() * Math.PI * 2;
+                            this.createLightningBranch(randomAngle);
+                        }
+
+                        // Occasional mega bursts
+                        if (Math.random() > 0.98) {
+                            this.createLightningBurst();
+                        }
+                    }
+
+                    const nextDelay = this.continuousMode ?
+                        300 + Math.random() * 500 :
+                        2000 + Math.random() * 3000;
+
+                    this.animationId = setTimeout(animate, nextDelay);
+                };
+
+                animate();
+            }
+
+            createLightningBurst() {
+                for (let i = 0; i < 12; i++) {
+                    setTimeout(() => {
+                        const angle = (i * Math.PI * 2) / 12 + (Math.random() - 0.5) * 0.5;
+                        this.createLightningBranch(angle);
+                    }, i * 60);
+                }
+            }
+
+            createMegaStrike() {
+                // Massive lightning display
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const angle = Math.random() * Math.PI * 2;
+                        this.createLightningBranch(angle, Math.random() > 0.5 ? 'primary' : 'secondary');
+                    }, i * 80);
+                }
+            }
+
+            createHoloParticles() {
+                setInterval(() => {
+                    for (let i = 0; i < 3; i++) {
+                        this.createHoloParticle();
+                    }
+                }, 1200);
+            }
+
+            createEnergyParticles() {
+                setInterval(() => {
+                    for (let i = 0; i < 2; i++) {
+                        this.createEnergyParticle();
+                    }
+                }, 800);
+            }
+
+            createNeuralParticles() {
+                setInterval(() => {
+                    for (let i = 0; i < 2; i++) {
+                        this.createNeuralParticle();
+                    }
+                }, 1000);
+            }
+
+            createHoloParticle() {
+                const particle = document.createElement('div');
+                particle.classList.add('holo-particle');
+
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+
+                document.body.appendChild(particle);
+
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 25000);
+            }
+
+            createEnergyParticle() {
+                const particle = document.createElement('div');
+                particle.classList.add('energy-particle');
+
+                const coreElement = document.querySelector('.ai-consciousness');
+                const rect = coreElement.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 100 + Math.random() * 200;
+
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                particle.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+                particle.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+
+                document.body.appendChild(particle);
+
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 5000);
+            }
+
+            createNeuralParticle() {
+                const particle = document.createElement('div');
+                particle.classList.add('neural-particle');
+
+                const coreElement = document.querySelector('.ai-consciousness');
+                const rect = coreElement.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 80 + Math.random() * 120;
+
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                particle.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+                particle.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+
+                document.body.appendChild(particle);
+
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 3000);
+            }
+
+            toggleContinuousMode() {
+                this.continuousMode = !this.continuousMode;
+                this.updateButtonState();
+            }
+
+            updateButtonState() {
+                const btn = document.getElementById('autoToggle');
+                btn.textContent = this.continuousMode ? '🔥 AUTO ON' : '🔥 AUTO OFF';
+                btn.className = this.continuousMode ? 'lightning-btn' : 'lightning-btn auto-off';
+            }
+        }
+
+        // Initialize enhanced lightning system
+        const lightningSystem = new AdvancedLightningSystem();
+
+        // Enhanced control functions
+        function toggleContinuousLightning() {
+            lightningSystem.toggleContinuousMode();
+        }
+
+        function triggerLightningBurst() {
+            lightningSystem.createLightningBurst();
+        }
+
+        function triggerMegaStrike() {
+            lightningSystem.createMegaStrike();
+        }
+
+        function triggerConsciousnessLightning() {
+            // Special consciousness lightning burst
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const angle = Math.random() * Math.PI * 2;
+                    lightningSystem.createLightningBranch(angle, i % 3 === 0 ? 'primary' : i % 2 === 0 ? 'secondary' : 'tertiary');
+                }, i * 100);
+            }
+        }
+
+        // Enhanced time display
+        function updateQuantumTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('quantum-time');
+            const dateElement = document.getElementById('quantum-date');
+
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const dateString = now.toLocaleDateString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric'
+            }).toUpperCase();
+
+            timeElement.textContent = timeString;
+            dateElement.textContent = dateString;
+        }
+
+        // Enhanced interactions
+        document.querySelectorAll('.action-module, .neural-item, .quantum-module').forEach(element => {
+            element.addEventListener('click', function() {
+                this.style.boxShadow = '0 0 50px rgba(0, 255, 255, 1)';
+
+                // Trigger lightning on interaction
+                if (Math.random() > 0.4) {
+                    const angle = Math.random() * Math.PI * 2;
+                    lightningSystem.createLightningBranch(angle, 'tertiary');
+                }
+
+                setTimeout(() => {
+                    this.style.boxShadow = '';
+                }, 500);
+            });
+        });
+
+        // Mouse interaction for lightning
+        document.addEventListener('mousemove', (e) => {
+            if (Math.random() > 0.985) {
+                const coreElement = document.querySelector('.ai-consciousness');
+                const rect = coreElement.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+                lightningSystem.createLightningBranch(angle, 'tertiary');
+            }
+        });
+
+        // Initialize all systems
+        updateQuantumTime();
+        setInterval(updateQuantumTime, 1000);
+
+        // Boot sequence simulation
+        setTimeout(() => {
+            console.log('%c🌐 NEXUS PROTOCOL v2.0 INITIALIZED', 'color: #00ffff; font-size: 16px; font-weight: bold;');
+            console.log('%c⚡ Enhanced Lightning System: ACTIVE', 'color: #ffff00;');
+            console.log('%c🧠 Neural consciousness: RESPONSIVE', 'color: #00ff00;');
+            console.log('%c🔮 Quantum core: OPTIMIZED', 'color: #ff00ff;');
+            console.log('%c📱 Responsive Design: ALL SCREENS', 'color: #00ff00;');
+            console.log('%c🚀 THUNDER NEURAL DIARY READY', 'color: #00ffff; font-size: 14px; font-weight: bold;');
+        }, 1000);
+    </script>
+</body>
+</html>

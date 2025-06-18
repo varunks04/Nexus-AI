@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Record - JARVIS AI Diary</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Quantum Grid Background */
+        .quantum-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: quantumFlow 20s linear infinite;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .record-container {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.3);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(20px);
+        }
+
+        .record-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .record-title {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .neural-orb {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #00ffff, #0080ff);
+            border-radius: 50%;
+            position: relative;
+            animation: orbPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 40px #00ffff;
+        }
+
+        .neural-orb.recording {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ff4444, #ff0000);
+            box-shadow: 0 0 40px #ff4444;
+            animation: recordingPulse 0.5s ease-in-out infinite;
+        }
+
+        .neural-orb.listening {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ffaa00, #ff8800);
+            box-shadow: 0 0 40px #ffaa00;
+            animation: listeningPulse 1s ease-in-out infinite;
+        }
+
+        .neural-orb::before {
+            content: '🎤';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: #000;
+        }
+
+        .neural-orb.recording::before {
+            content: '🔴';
+        }
+
+        .neural-orb.listening::before {
+            content: '👂';
+        }
+
+        .neural-orb::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: orbRotate 3s linear infinite;
+        }
+
+        .neural-orb.recording::after {
+            border-color: #ff4444;
+            border-top-color: transparent;
+        }
+
+        .neural-orb.listening::after {
+            border-color: #ffaa00;
+            border-top-color: transparent;
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes recordingPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        @keyframes listeningPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.9; }
+        }
+
+        @keyframes orbRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .record-btn {
+            background: linear-gradient(45deg, #ff4444, #ffff00);
+            border: none;
+            padding: 20px 40px;
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 15px;
+            font-size: 1.2em;
+            margin: 20px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .record-btn:hover {
+            box-shadow: 0 0 30px #ffff00;
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        .record-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .continue-btn {
+            background: linear-gradient(45deg, #00ff88, #00dddd);
+            margin-left: 10px;
+        }
+
+        .continue-btn:hover {
+            box-shadow: 0 0 30px #00ff88;
+        }
+
+        .status-text {
+            margin: 20px 0;
+            font-size: 1.1em;
+            color: #00d4ff;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            min-height: 25px;
+        }
+
+        .conversation-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 30, 60, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 15px;
+            text-align: left;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .conversation-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .conversation-message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .user-message {
+            background: rgba(0, 100, 200, 0.3);
+            border-left: 4px solid #00d4ff;
+        }
+
+        .jarvis-message {
+            background: rgba(0, 200, 100, 0.3);
+            border-left: 4px solid #00ff88;
+        }
+
+        .message-label {
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: #00ffff;
+        }
+
+        .message-content {
+            color: #88ccff;
+            line-height: 1.6;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 30, 60, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 15px;
+            text-align: left;
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            color: #00ffff;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .result-content {
+            color: #88ccff;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #666666, #999999);
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-btn:hover {
+            box-shadow: 0 0 20px #999999;
+            transform: translateY(-2px);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .neural-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-module {
+            background: rgba(0, 255, 255, 0.15);
+            border: 1px solid #00d4ff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            animation: statGlow 2s ease-in-out infinite alternate;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #00ff00;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #00d4ff;
+            margin-top: 5px;
+        }
+
+        @keyframes statGlow {
+            0% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.3); }
+            100% { box-shadow: 0 0 25px rgba(0, 255, 255, 0.6); }
+        }
+
+        .loading {
+            color: #ffff00;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+
+        .conversation-controls {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .conversation-controls.show {
+            display: block;
+        }
+
+        /* Scrollbar styling */
+        .conversation-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .conversation-section::-webkit-scrollbar-track {
+            background: rgba(0, 50, 100, 0.3);
+            border-radius: 4px;
+        }
+
+        .conversation-section::-webkit-scrollbar-thumb {
+            background: #00d4ff;
+            border-radius: 4px;
+        }
+
+        .conversation-section::-webkit-scrollbar-thumb:hover {
+            background: #00ffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+    
+    <div class="record-container">
+        <h1 class="record-title">Neural Voice Interface</h1>
+        
+        <div class="neural-orb" id="neural-orb"></div>
+          <div class="neural-stats">
+            <div class="stat-module">
+                <div class="stat-value" id="status-indicator">READY</div>
+                <div class="stat-label">STATUS</div>
+            </div>
+            <div class="stat-module">
+                <div class="stat-value" id="auto-mode-indicator">AUTO</div>
+                <div class="stat-label">MODE</div>
+            </div>
+            <div class="stat-module">
+                <div class="stat-value" id="neural-indicator">ACTIVE</div>
+                <div class="stat-label">NEURAL</div>
+            </div>
+        </div>
+        
+        <p class="status-text" id="status-message">Neural interface ready for voice capture</p>
+        
+        <div class="silence-controls" style="margin: 20px 0; display: flex; justify-content: center; gap: 20px; align-items: center;">
+            <div style="color: #00d4ff; font-family: 'Rajdhani', sans-serif;">
+                <label for="silence-timeout">Auto-stop delay:</label>
+                <select id="silence-timeout" style="margin-left: 10px; background: rgba(0,50,100,0.5); color: #00d4ff; border: 1px solid #00d4ff; border-radius: 5px; padding: 5px;">
+                    <option value="2000">2 seconds</option>
+                    <option value="3000" selected>3 seconds</option>
+                    <option value="4000">4 seconds</option>
+                    <option value="5000">5 seconds</option>
+                </select>
+            </div>
+            <div style="color: #00d4ff; font-family: 'Rajdhani', sans-serif;">
+                <label for="auto-mode">Auto-continue:</label>
+                <input type="checkbox" id="auto-mode" checked style="margin-left: 10px; transform: scale(1.2);">
+            </div>
+        </div>
+        
+        <div class="record-controls">
+            <button class="record-btn" id="start-record-btn">⚡ Start Recording</button>
+            <button class="record-btn" id="stop-record-btn" style="display: none; background: linear-gradient(45deg, #ff0000, #ff4444);">⏹️ Stop Recording</button>
+        </div>        <div class="conversation-controls" id="conversation-controls" style="display: none;">
+            <button class="record-btn continue-btn" id="continue-conversation-btn">🗨️ Continue Conversation</button>
+            <button class="record-btn" id="end-conversation-btn" style="background: linear-gradient(45deg, #ff6b6b, #ee5a24);">🛑 End Conversation</button>
+        </div><div class="conversation-section" id="conversation-section">
+            <div class="result-title">💬 Conversation with <span id="ai-name-display">{{ ai_name or 'JARVIS' }}</span></div>
+            <div id="conversation-history"></div>
+        </div>
+
+        <div class="result-section" id="result-section">
+            <div class="result-title">📝 Session Summary:</div>
+            <div class="result-content" id="session-summary"></div>
+        </div>
+
+        <a href="/" class="back-btn">← Return to Neural Interface</a>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('start-record-btn');
+        const stopBtn = document.getElementById('stop-record-btn');
+        const continueBtn = document.getElementById('continue-conversation-btn');
+        const endConversationBtn = document.getElementById('end-conversation-btn');
+        const statusMessage = document.getElementById('status-message');
+        const conversationSection = document.getElementById('conversation-section');
+        const conversationHistory = document.getElementById('conversation-history');
+        const conversationControls = document.getElementById('conversation-controls');
+        const resultSection = document.getElementById('result-section');
+        const sessionSummary = document.getElementById('session-summary');
+        const neuralOrb = document.getElementById('neural-orb');
+        const statusIndicator = document.getElementById('status-indicator');
+        const neuralIndicator = document.getElementById('neural-indicator');
+        const autoModeIndicator = document.getElementById('auto-mode-indicator');
+        const silenceTimeoutSelect = document.getElementById('silence-timeout');
+        const autoModeCheckbox = document.getElementById('auto-mode');
+          let mediaRecorder;
+        let audioChunks = [];
+        let stream;
+        let conversationMessages = [];
+        let isConversationActive = false;
+        let isProcessing = false;
+        let silenceDetectionTimer;
+        let audioContext;
+        let analyser;
+        let silenceThreshold = 0.01; // Adjust for sensitivity
+        let silenceTimeout = 3000; // 3 seconds of silence        // Session tracking for greetings
+        let sessionGreetingGiven = sessionStorage.getItem('jarvis_greeting_given') === 'true';
+
+        // Check for browser support
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            statusMessage.textContent = 'Error: Browser does not support audio recording';
+            startBtn.disabled = true;
+        }
+
+        // Handle control changes
+        silenceTimeoutSelect.addEventListener('change', (e) => {
+            silenceTimeout = parseInt(e.target.value);
+        });
+
+        autoModeCheckbox.addEventListener('change', (e) => {
+            autoModeIndicator.textContent = e.target.checked ? 'AUTO' : 'MANUAL';
+            autoModeIndicator.style.color = e.target.checked ? '#00ff00' : '#ffaa00';
+        });
+
+        // Initialize page with greeting (only once per session)
+        window.addEventListener('load', async () => {
+            if (!sessionGreetingGiven) {
+                try {
+                    // Send greeting request
+                    const response = await fetch('/speak-greeting', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            type: 'neural_record',
+                            user_name: '' // Can be populated from user profile
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        statusMessage.textContent = result.greeting;
+                        console.log('Neural interface greeting played:', result.voice_generated);
+                        // Mark greeting as given for this session
+                        sessionStorage.setItem('jarvis_greeting_given', 'true');
+                        sessionGreetingGiven = true;
+                    }
+                } catch (error) {
+                    console.error('Error playing greeting:', error);
+                    statusMessage.textContent = "Neural interface ready for voice capture";
+                }
+            } else {
+                // Just show ready message, no voice greeting
+                statusMessage.textContent = "Neural interface ready for voice capture";
+                console.log('Greeting already given in this session - showing ready status');
+            }
+        });
+
+        // Function to send status updates with voice feedback
+        async function sendStatusUpdate(type, success = true, details = {}) {
+            try {
+                const response = await fetch('/speak-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        type: type,
+                        success: success,
+                        details: details
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    statusMessage.textContent = result.message;
+                    return result.voice_generated;
+                }
+            } catch (error) {
+                console.error('Error sending status update:', error);
+            }
+            return false;
+        }
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                if (isProcessing) return;
+                
+                // Reset if starting new conversation
+                if (!isConversationActive) {
+                    conversationMessages = [];
+                    conversationHistory.innerHTML = '';
+                    conversationSection.classList.remove('show');
+                    resultSection.classList.remove('show');
+                }
+                
+                // Request microphone access
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        sampleRate: 16000
+                    } 
+                });
+
+                // Set up audio context for silence detection
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                source.connect(analyser);
+
+                // Create MediaRecorder with proper MIME type
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+                    ? 'audio/webm;codecs=opus' 
+                    : 'audio/webm';
+                
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    await processRecording();
+                };
+
+                mediaRecorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event.error);
+                    statusMessage.textContent = 'Recording error occurred';
+                    resetInterface();
+                };
+
+                // Start recording
+                mediaRecorder.start(1000);
+                
+                // Start silence detection
+                startSilenceDetection();
+                
+                // Update UI
+                statusMessage.textContent = 'Recording neural input... Speak clearly into your microphone.';
+                statusMessage.classList.add('loading');
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'inline-block';
+                neuralOrb.classList.add('recording');
+                statusIndicator.textContent = 'REC';
+                statusIndicator.style.color = '#ff4444';
+                neuralIndicator.textContent = 'LIVE';
+
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                handleMicrophoneError(error);
+            }
+        });        function startSilenceDetection() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            
+            function detectSilence() {
+                if (!analyser || !mediaRecorder || mediaRecorder.state !== 'recording') {
+                    return;
+                }
+                
+                analyser.getByteFrequencyData(dataArray);
+                
+                // Calculate average volume
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength / 255; // Normalize to 0-1
+                
+                // Update visual feedback based on audio level
+                updateAudioLevelVisual(average);
+                
+                if (average < silenceThreshold) {
+                    // Silence detected
+                    if (!silenceDetectionTimer) {
+                        silenceDetectionTimer = setTimeout(() => {
+                            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                                console.log('Auto-stopping due to silence');
+                                stopRecording();
+                            }
+                        }, silenceTimeout);
+                    }
+                } else {
+                    // Voice detected, reset silence timer
+                    if (silenceDetectionTimer) {
+                        clearTimeout(silenceDetectionTimer);
+                        silenceDetectionTimer = null;
+                    }
+                }
+                
+                // Continue monitoring
+                requestAnimationFrame(detectSilence);
+            }
+            
+            detectSilence();
+        }
+
+        function updateAudioLevelVisual(level) {
+            // Update orb intensity based on audio level
+            const intensity = Math.min(level * 10, 1); // Amplify sensitivity
+            neuralOrb.style.boxShadow = `0 0 ${20 + intensity * 60}px rgba(255, 68, 68, ${0.5 + intensity * 0.5})`;
+            
+            // Update status if voice is detected
+            if (level > silenceThreshold) {
+                statusIndicator.textContent = 'VOICE';
+            } else if (silenceDetectionTimer) {
+                statusIndicator.textContent = 'WAIT';
+            } else {
+                statusIndicator.textContent = 'REC';
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                statusMessage.textContent = 'Processing neural patterns with JARVIS...';
+                statusMessage.classList.add('loading');
+                stopBtn.disabled = true;
+                neuralOrb.classList.remove('recording');
+                neuralOrb.classList.add('listening');
+                statusIndicator.textContent = 'PROC';
+                statusIndicator.style.color = '#ffaa00';
+                
+                // Clear silence detection
+                if (silenceDetectionTimer) {
+                    clearTimeout(silenceDetectionTimer);
+                    silenceDetectionTimer = null;
+                }
+            }
+        }
+
+        stopBtn.addEventListener('click', stopRecording);        continueBtn.addEventListener('click', async () => {
+            try {
+                continueBtn.disabled = true;
+                const aiName = document.getElementById('ai-name-display').textContent;
+                statusMessage.textContent = `${aiName} is thinking...`;
+                statusMessage.classList.add('loading');
+                
+                const response = await fetch('/continue-conversation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        conversation_history: conversationMessages
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();                if (data.response) {
+                    const aiName = document.getElementById('ai-name-display').textContent;
+                    addMessageToConversation(aiName, data.response);                    statusMessage.textContent = `${aiName} has responded. Listening for your next message...`;
+                    statusMessage.classList.remove('loading');
+                    
+                    // Auto-start recording after continue conversation (if auto-mode is enabled)
+                    if (autoModeCheckbox.checked) {
+                        setTimeout(() => {
+                            if (isConversationActive && !isProcessing) {
+                                autoStartRecording();
+                            }
+                        }, 2000);
+                    } else {
+                        // Manual mode - show start button
+                        setTimeout(() => {
+                            startBtn.style.display = 'inline-block';
+                            statusMessage.textContent = 'Ready for next recording. Click start when ready.';
+                        }, 1000);
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to get response');
+                }
+
+            } catch (error) {
+                console.error('Continue conversation error:', error);
+                statusMessage.textContent = `Error: ${error.message}`;
+                statusMessage.classList.remove('loading');
+            } finally {
+                continueBtn.disabled = false;
+            }
+        });        endConversationBtn.addEventListener('click', () => {
+            // End the conversation and show final summary
+            isConversationActive = false;
+            isProcessing = false;
+            
+            // Stop any ongoing recording
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+            
+            // Clear any silence detection timers
+            if (silenceDetectionTimer) {
+                clearTimeout(silenceDetectionTimer);
+                silenceDetectionTimer = null;
+            }
+            
+            // Clean up stream
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            // Hide conversation controls
+            conversationControls.style.display = 'none';
+            
+            // Update status
+            statusMessage.textContent = 'Conversation ended. You can start a new conversation by recording again.';
+            statusMessage.classList.remove('loading');
+            statusIndicator.textContent = 'READY';
+            statusIndicator.style.color = '#00ff00';
+            neuralIndicator.textContent = 'ACTIVE';
+            
+            // Reset interface to initial state
+            resetInterface();
+            
+            // Generate final session summary
+            generateSessionSummary();
+        });
+
+        async function generateSessionSummary() {
+            try {
+                if (conversationMessages.length === 0) {
+                    await sendStatusUpdate('conversation_end', false, {
+                        additional_info: 'No conversation to summarize.'
+                    });
+                    return;
+                }
+                
+                // Send conversation end status
+                await sendStatusUpdate('conversation_end', true, {
+                    additional_info: `Our conversation with ${conversationMessages.length} exchanges has been saved to your diary.`
+                });
+                
+                // Create summary
+                const conversationText = conversationMessages.map(msg => 
+                    `${msg.sender}: ${msg.message}`
+                ).join('\n');
+                
+                const summary = `Voice Conversation Session:\n${conversationText}`;
+                
+                // Save to diary
+                const saveResponse = await fetch('/save-entry', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: summary
+                    })
+                });
+                
+                if (saveResponse.ok) {
+                    const saveResult = await saveResponse.json();
+                    updateSessionSummary(saveResult.analysis || 'Session saved successfully');
+                    
+                    await sendStatusUpdate('save_entry', true, {
+                        additional_info: 'Your conversation session has been saved to your diary.'
+                    });
+                } else {
+                    await sendStatusUpdate('save_entry', false);
+                }
+                
+                // Reset interface
+                resetInterface();
+                
+            } catch (error) {
+                console.error('Session summary error:', error);
+                await sendStatusUpdate('conversation_end', false, {
+                    additional_info: 'Error saving conversation session.'
+                });
+            }
+        }        async function processRecording() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                statusMessage.textContent = "Processing your voice input...";
+                statusMessage.classList.add('loading');
+                neuralOrb.className = 'neural-orb';
+                
+                // Send status update for voice processing start
+                await sendStatusUpdate('voice_processing', true, {
+                    additional_info: 'Analyzing your audio input.'
+                });
+                
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                
+                const response = await fetch('/transcribe_and_analyze_audio', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Add user message
+                    addMessageToConversation('user', result.transcribed_text);
+                    
+                    // Add JARVIS response
+                    addMessageToConversation('jarvis', result.ai_response);
+                    
+                    // Show conversation section
+                    conversationSection.classList.add('show');
+                    conversationControls.classList.add('show');
+                    
+                    statusMessage.classList.remove('loading');
+                    
+                    // Send success status update
+                    await sendStatusUpdate('voice_processing', true, {
+                        additional_info: 'Your voice has been transcribed and I have provided my response.'
+                    });
+                    
+                    // Auto-start recording again for continuous conversation
+                    if (autoModeCheckbox && autoModeCheckbox.checked && isConversationActive) {
+                        setTimeout(() => {
+                            autoStartRecording();
+                        }, 2000);
+                    }
+                    
+                } else {
+                    statusMessage.textContent = result.message || 'Processing failed';
+                    statusMessage.classList.remove('loading');
+                    
+                    // Send error status update
+                    await sendStatusUpdate('voice_processing', false, {
+                        additional_info: result.message || 'Please try again.'
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Processing error:', error);
+                statusMessage.textContent = 'Error processing audio. Please try again.';
+                statusMessage.classList.remove('loading');
+                
+                // Send error status update
+                await sendStatusUpdate('voice_processing', false, {
+                    additional_info: 'Network or processing error occurred.'
+                });
+            }
+            
+            isProcessing = false;
+            audioChunks = [];
+        }
+
+        async function autoStartRecording() {
+            try {
+                if (isProcessing || !isConversationActive) return;
+                
+                // Only auto-start if we already have stream access
+                if (!stream || stream.getTracks().every(track => track.readyState === 'ended')) {
+                    // Need to request new stream
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true,
+                            sampleRate: 16000
+                        } 
+                    });
+                    
+                    // Set up audio context for silence detection
+                    if (audioContext && audioContext.state !== 'closed') {
+                        audioContext.close();
+                    }
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 2048;
+                    source.connect(analyser);
+                }
+
+                // Create new MediaRecorder
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+                    ? 'audio/webm;codecs=opus' 
+                    : 'audio/webm';
+                
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    await processRecording();
+                };
+
+                mediaRecorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event.error);
+                    statusMessage.textContent = 'Recording error occurred - switching to manual mode';
+                    autoModeCheckbox.checked = false;
+                    autoModeIndicator.textContent = 'MANUAL';
+                    autoModeIndicator.style.color = '#ffaa00';
+                    resetInterface();
+                };
+
+                // Start recording
+                mediaRecorder.start(1000);
+                
+                // Start silence detection
+                startSilenceDetection();
+                
+                // Update UI for auto-recording
+                statusMessage.textContent = 'Auto-listening... Speak when ready or use manual controls.';
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'inline-block';
+                neuralOrb.classList.add('recording');
+                statusIndicator.textContent = 'AUTO';
+                statusIndicator.style.color = '#ff4444';
+                neuralIndicator.textContent = 'LIVE';
+
+            } catch (error) {
+                console.error('Error in auto-start recording:', error);
+                // Fall back to manual mode
+                statusMessage.textContent = 'Auto-recording failed. Switching to manual mode.';
+                autoModeCheckbox.checked = false;
+                autoModeIndicator.textContent = 'MANUAL';
+                autoModeIndicator.style.color = '#ffaa00';
+                resetInterface();
+                
+                // Show start button for manual operation
+                setTimeout(() => {
+                    startBtn.style.display = 'inline-block';
+                    statusMessage.textContent = 'Ready for manual recording. Click start when ready.';
+                }, 1000);
+            }
+        }
+
+        function addMessageToConversation(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `conversation-message ${sender.toLowerCase()}-message`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-label">${sender}:</div>
+                <div class="message-content">${message}</div>
+            `;
+            
+            conversationHistory.appendChild(messageDiv);
+            conversationHistory.scrollTop = conversationHistory.scrollHeight;
+            
+            // Store in conversation history
+            conversationMessages.push({
+                role: sender.toLowerCase(),
+                content: message,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        function updateSessionSummary(analysis) {
+            sessionSummary.textContent = analysis || 'Session analysis will be available at the end of the conversation.';
+            resultSection.classList.add('show');
+        }
+
+        function handleMicrophoneError(error) {
+            let errorMessage = 'Microphone access denied or not available. ';
+            
+            if (error.name === 'NotAllowedError') {
+                errorMessage += 'Please allow microphone access and refresh the page.';
+            } else if (error.name === 'NotFoundError') {
+                errorMessage += 'No microphone found. Please connect a microphone.';
+            } else {
+                errorMessage += 'Please check your microphone settings.';
+            }
+            
+            statusMessage.textContent = errorMessage;
+            statusMessage.classList.remove('loading');
+        }        function resetInterface() {
+            // Stop stream tracks to release microphone only if conversation is not active
+            if (stream && !isConversationActive) {
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                });
+                stream = null;
+            }
+            
+            // Clean up audio context
+            if (audioContext && audioContext.state !== 'closed') {
+                audioContext.close();
+                audioContext = null;
+            }
+            
+            // Clear silence detection
+            if (silenceDetectionTimer) {
+                clearTimeout(silenceDetectionTimer);
+                silenceDetectionTimer = null;
+            }
+            
+            // Reset UI only if not in conversation mode
+            if (!isConversationActive) {
+                startBtn.style.display = 'inline-block';
+                stopBtn.style.display = 'none';
+                stopBtn.disabled = false;
+                neuralOrb.classList.remove('recording', 'listening');
+            } else {
+                // In conversation mode, hide both buttons during processing
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'none';
+                stopBtn.disabled = false;
+                neuralOrb.classList.remove('recording', 'listening');
+            }
+            
+            // Reset mediaRecorder
+            mediaRecorder = null;
+            audioChunks = [];
+        }        // Handle page unload to clean up resources
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            // Option to reset greeting for next session if conversation was active
+            if (isConversationActive) {
+                sessionStorage.removeItem('jarvis_greeting_given');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Data Export Interface - JARVIS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #020208 50%, #000000 100%);
+            color: #00d4ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: quantumFlow 20s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes quantumFlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .lightning-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .lightning-branch {
+            stroke: #00ffff;
+            stroke-width: 2;
+            fill: none;
+            opacity: 0;
+            filter: drop-shadow(0 0 10px #00ffff);
+        }
+
+        @keyframes lightningFlash {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            20% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        .export-container {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .neural-header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 150, 255, 0.08));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(20px);
+        }
+
+        .neural-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: headerScan 3s ease-in-out infinite;
+        }
+
+        @keyframes headerScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .export-title {
+            font-size: 3.5em;
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 30px #00ffff, 0 0 60px #0088ff;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .export-subtitle {
+            font-size: 1.2em;
+            color: #00d4ff;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .export-orb {
+            width: 120px;
+            height: 120px;
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            margin: 20px auto;
+            position: relative;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.2), transparent);
+            animation: exportPulse 3s ease-in-out infinite;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.6);
+        }
+
+        .export-orb::after {
+            content: '📤';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            animation: exportRotate 6s linear infinite;
+        }
+
+        @keyframes exportPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes exportRotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .export-form {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .export-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .export-form:hover::before {
+            left: 100%;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            font-size: 1.6em;
+            color: #00ffff;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 0 0 15px #00ffff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-icon {
+            font-size: 1.2em;
+            padding: 10px;
+            background: rgba(0, 50, 100, 0.8);
+            border-radius: 50%;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: #00ffff;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .date-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .date-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .date-label {
+            color: #88ccff;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 15px 18px;
+            color: #00ffff;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 30, 60, 0.9);
+        }
+
+        .form-input::placeholder {
+            color: #0088ff;
+            opacity: 0.7;
+        }
+
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .format-option {
+            background: rgba(0, 30, 60, 0.6);
+            border: 2px solid #00d4ff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .format-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .format-option:hover::before {
+            left: 100%;
+        }
+
+        .format-option:hover {
+            background: rgba(0, 50, 100, 0.8);
+            border-color: #00ffff;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .format-option.selected {
+            background: rgba(0, 100, 200, 0.8);
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+        }
+
+        .format-radio {
+            display: none;
+        }
+
+        .format-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: block;
+            color: #00ffff;
+        }
+
+        .format-name {
+            font-weight: 700;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .format-desc {
+            font-size: 0.9em;
+            color: #88ccff;
+            font-weight: 400;
+        }
+
+        .entry-types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .entry-type-item {
+            background: rgba(0, 30, 60, 0.6);
+            border: 2px solid #00d4ff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .entry-type-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .entry-type-item:hover::before {
+            left: 100%;
+        }
+
+        .entry-type-item:hover {
+            background: rgba(0, 50, 100, 0.8);
+            border-color: #00ffff;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .entry-type-item.selected {
+            background: rgba(0, 100, 200, 0.8);
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+        }
+
+        .entry-checkbox {
+            display: none;
+        }
+
+        .entry-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+            color: #00ffff;
+        }
+
+        .entry-name {
+            font-weight: 700;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .entry-desc {
+            font-size: 0.85em;
+            color: #88ccff;
+            font-weight: 400;
+        }
+
+        .export-actions {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .neural-btn {
+            background: linear-gradient(45deg, #ff4444, #ffff00, #44ff44);
+            background-size: 300% 100%;
+            border: none;
+            padding: 18px 35px;
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 15px;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+            animation: colorShift 3s ease-in-out infinite;
+            margin: 0 10px;
+        }
+
+        @keyframes colorShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .neural-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 40px rgba(255, 255, 0, 0.7);
+        }
+
+        .neural-btn.secondary {
+            background: linear-gradient(45deg, #333, #666, #999);
+            box-shadow: 0 0 30px rgba(153, 153, 153, 0.5);
+            animation: none;
+        }
+
+        .neural-btn.secondary:hover {
+            box-shadow: 0 10px 40px rgba(153, 153, 153, 0.7);
+        }
+
+        .progress-container {
+            display: none;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .progress-title {
+            font-size: 1.4em;
+            color: #00ffff;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .neural-progress {
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 25px;
+            height: 40px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .neural-progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #00ffff, #0088ff, #00d4ff);
+            background-size: 400% 100%;
+            animation: progressFlow 2s ease-in-out infinite;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 700;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1em;
+            border-radius: 23px;
+            width: 0%;
+        }
+
+        @keyframes progressFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 30, 60, 0.9);
+            border: 2px solid #00d4ff;
+            color: #00ffff;
+            padding: 15px 20px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(45deg, #00d4ff, #0088ff);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.6);
+            text-decoration: none;
+        }
+
+        .quantum-time {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 30, 60, 0.9);
+            border: 2px solid #00d4ff;
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 1em;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .export-container {
+                padding: 15px;
+            }
+
+            .export-title {
+                font-size: 2.5em;
+            }
+
+            .date-row {
+                grid-template-columns: 1fr;
+            }
+
+            .format-grid, .entry-types-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .neural-btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 10px 15px;
+            }
+
+            .quantum-time {
+                bottom: 10px;
+                right: 10px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-grid"></div>
+    
+    <!-- Lightning SVG Container -->
+    <svg class="lightning-container" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <!-- Lightning paths will be generated by JavaScript -->
+    </svg>
+
+    <!-- Back Button -->
+    <a href="/" class="back-btn">← Neural Interface</a>
+
+    <div class="export-container">
+        <!-- Neural Header -->
+        <header class="neural-header">
+            <div class="export-orb"></div>
+            <h1 class="export-title">Neural Data Export</h1>
+            <p class="export-subtitle">Consciousness Archive • Data Extraction • Neural Backup</p>
+        </header>
+
+        <!-- Export Form -->
+        <form class="export-form" id="exportForm" action="/process-export" method="POST">
+            <!-- Date Range Section -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span class="section-icon">📅</span>
+                    Neural Timeline Selection
+                </h3>
+                <div class="form-group">
+                    <label class="form-label">Consciousness Data Range:</label>
+                    <div class="date-row">
+                        <div class="date-group">
+                            <label class="date-label">Start Quantum Point:</label>
+                            <input type="date" class="form-input" id="startDate" name="startDate" required>
+                        </div>
+                        <div class="date-group">
+                            <label class="date-label">End Quantum Point:</label>
+                            <input type="date" class="form-input" id="endDate" name="endDate" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Format Section -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span class="section-icon">💾</span>
+                    Neural Export Protocol
+                </h3>
+                <div class="form-group">
+                    <label class="form-label">Data Transmission Format:</label>
+                    <div class="format-grid">
+                        <div class="format-option" onclick="selectFormat('txt')">
+                            <input type="radio" class="format-radio" name="format" value="txt" id="format_txt" required>
+                            <span class="format-icon">📄</span>
+                            <div class="format-name">Neural Text</div>
+                            <div class="format-desc">Raw consciousness data (.txt)</div>
+                        </div>
+                        <div class="format-option" onclick="selectFormat('pdf')">
+                            <input type="radio" class="format-radio" name="format" value="pdf" id="format_pdf" required>
+                            <span class="format-icon">📋</span>
+                            <div class="format-name">Quantum PDF</div>
+                            <div class="format-desc">Formatted neural document (.pdf)</div>
+                        </div>
+                        <div class="format-option" onclick="selectFormat('json')">
+                            <input type="radio" class="format-radio" name="format" value="json" id="format_json" required>
+                            <span class="format-icon">🔧</span>
+                            <div class="format-name">Data Matrix</div>
+                            <div class="format-desc">Structured neural data (.json)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entry Types Section -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span class="section-icon">🧠</span>
+                    Neural Data Categories
+                </h3>
+                <div class="form-group">
+                    <label class="form-label">Consciousness Stream Types:</label>
+                    <div class="entry-types-grid">
+                        <div class="entry-type-item selected" onclick="toggleEntryType('voice_record')">
+                            <input type="checkbox" class="entry-checkbox" name="entryTypes" value="voice_record" id="voice_record" checked>
+                            <span class="entry-icon">🎤</span>
+                            <div class="entry-name">Voice Neural</div>
+                            <div class="entry-desc">Audio consciousness records</div>
+                        </div>
+                        <div class="entry-type-item selected" onclick="toggleEntryType('text_input')">
+                            <input type="checkbox" class="entry-checkbox" name="entryTypes" value="text_input" id="text_input" checked>
+                            <span class="entry-icon">📝</span>
+                            <div class="entry-name">Text Neural</div>
+                            <div class="entry-desc">Written thought patterns</div>
+                        </div>
+                        <div class="entry-type-item selected" onclick="toggleEntryType('memory_scan')">
+                            <input type="checkbox" class="entry-checkbox" name="entryTypes" value="memory_scan" id="memory_scan" checked>
+                            <span class="entry-icon">🔍</span>
+                            <div class="entry-name">Memory Scan</div>
+                            <div class="entry-desc">Deep neural analysis data</div>
+                        </div>
+                        <div class="entry-type-item selected" onclick="toggleEntryType('data_sync')">
+                            <input type="checkbox" class="entry-checkbox" name="entryTypes" value="data_sync" id="data_sync" checked>
+                            <span class="entry-icon">🔄</span>
+                            <div class="entry-name">Sync Data</div>
+                            <div class="entry-desc">Quantum synchronization logs</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Actions -->
+            <div class="export-actions">
+                <button type="submit" class="neural-btn">Initiate Neural Export</button>
+                <button type="button" class="neural-btn secondary" onclick="previewExport()">Preview Data</button>
+            </div>
+        </form>
+
+        <!-- Progress Container -->
+        <div class="progress-container" id="progressContainer">
+            <h3 class="progress-title">⚡ Neural Export in Progress</h3>
+            <div class="neural-progress">
+                <div class="neural-progress-bar" id="progressBar">0%</div>
+            </div>
+            <div id="progressText">Initializing neural data extraction...</div>
+        </div>
+    </div>
+
+    <!-- Quantum Time Display -->
+    <div class="quantum-time" id="quantumTime"></div>
+
+    <script>
+        class LightningSystem {
+            constructor() {
+                this.svg = document.querySelector('.lightning-container');
+            }
+
+            createLightningPath() {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const startX = Math.random() * 100;
+                const startY = 0;
+                const endX = Math.random() * 100;
+                const endY = 100;
+
+                const midX1 = startX + (Math.random() - 0.5) * 30;
+                const midY1 = 25 + Math.random() * 25;
+                const midX2 = endX + (Math.random() - 0.5) * 30;
+                const midY2 = 50 + Math.random() * 25;
+
+                const d = `M ${startX} ${startY} Q ${midX1} ${midY1} ${midX2} ${midY2} T ${endX} ${endY}`;
+                
+                path.setAttribute('d', d);
+                path.classList.add('lightning-branch');
+                path.style.animation = `lightningFlash ${0.5 + Math.random() * 0.5}s ease-out`;
+
+                this.svg.appendChild(path);
+
+                setTimeout(() => {
+                    if (this.svg.contains(path)) {
+                        this.svg.removeChild(path);
+                    }
+                }, 1000);
+            }
+        }
+
+        // Initialize lightning system
+        const lightningSystem = new LightningSystem();
+
+        // Format selection
+        function selectFormat(format) {
+            // Remove selected class from all format options
+            document.querySelectorAll('.format-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            event.currentTarget.classList.add('selected');
+            
+            // Check the radio button
+            document.getElementById(`format_${format}`).checked = true;
+            
+            // Lightning effect
+            lightningSystem.createLightningPath();
+        }
+
+        // Entry type toggle
+        function toggleEntryType(type) {
+            const item = event.currentTarget;
+            const checkbox = document.getElementById(type);
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+            
+            // Lightning effect
+            lightningSystem.createLightningPath();
+        }
+
+        // Preview export
+        function previewExport() {
+            const formData = new FormData(document.getElementById('exportForm'));
+            
+            // Lightning effect
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => lightningSystem.createLightningPath(), i * 200);
+            }
+            
+            // Show preview modal or redirect to preview page
+            alert('🔍 Neural data preview will be implemented in next update');
+        }
+
+        // Form submission with progress
+        document.getElementById('exportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            // Show progress container
+            progressContainer.style.display = 'block';
+            
+            // Lightning burst for export start
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => lightningSystem.createLightningPath(), i * 100);
+            }
+            
+            // Simulate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    progressText.textContent = 'Neural export complete! Download starting...';
+                    
+                    // Submit the actual form after progress completes
+                    setTimeout(() => {
+                        this.submit();
+                    }, 1000);
+                }
+                
+                progressBar.style.width = `${progress}%`;
+                progressBar.textContent = `${Math.round(progress)}%`;
+                
+                if (progress < 100) {
+                    const messages = [
+                        'Scanning neural pathways...',
+                        'Extracting consciousness data...',
+                        'Processing memory fragments...',
+                        'Quantum-encrypting neural streams...',
+                        'Compiling consciousness archive...',
+                        'Finalizing data transmission...'
+                    ];
+                    progressText.textContent = messages[Math.floor(progress / 20)] || messages[messages.length - 1];
+                }
+            }, 300);
+        });
+
+        // Enhanced time display
+        function updateQuantumTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const dateString = now.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit'
+            });
+            
+            document.getElementById('quantumTime').innerHTML = `
+                <div style="font-size: 1.1em;">${timeString}</div>
+                <div style="font-size: 0.8em; opacity: 0.8;">${dateString}</div>
+                <div style="font-size: 0.6em; opacity: 0.6;">EXPORT TIME</div>
+            `;
+        }
+
+        // Interactive elements
+        document.querySelectorAll('.format-option, .entry-type-item, .neural-btn').forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                if (Math.random() > 0.8) {
+                    lightningSystem.createLightningPath();
+                }
+            });
+        });
+
+        // Mouse interaction for lightning
+        document.addEventListener('mousemove', (e) => {
+            if (Math.random() > 0.995) {
+                lightningSystem.createLightningPath();
+            }
+        });
+
+        // Set default dates
+        function setDefaultDates() {
+            const today = new Date();
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+            
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            document.getElementById('startDate').value = lastMonth.toISOString().split('T')[0];
+        }
+
+        // Initialize all systems
+        updateQuantumTime();
+        setInterval(updateQuantumTime, 1000);
+        setDefaultDates();
+
+        // Boot sequence
+        setTimeout(() => {
+            console.log('%c📤 NEURAL EXPORT INTERFACE READY', 'color: #00ffff; font-size: 14px; font-weight: bold;');
+        }, 1000);
+    </script>
+</body>
+</html>
