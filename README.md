@@ -3,6 +3,7 @@
 **An intelligent personal diary that talks back to you!**
 
 JARVIS AI Diary is a smart diary application that understands your voice, responds intelligently, and helps you analyze your thoughts and emotions. Just like Tony Stark's AI assistant JARVIS from the movies, this system can have conversations with you, remember what you say, and provide insights about your mental state and daily experiences.
+![Screenshot 2025-06-18 220036](https://github.com/user-attachments/assets/f4106dcd-b36e-4e85-a3e8-c91fccc32781)
 
 **Perfect for:**
 - 📝 Daily journaling with voice input
@@ -20,6 +21,8 @@ JARVIS AI Diary is a smart diary application that understands your voice, respon
 - **Multiple Voice Options**: Choose between male and female voices
 - **Customizable Speech**: Adjust voice speed and volume to your preference
 - **Session Greetings**: JARVIS greets you when you start but won't repeat greetings unnecessarily
+![Screenshot 2025-06-18 220300](https://github.com/user-attachments/assets/de8765b6-370a-46bf-88c4-52f53588c786)
+
 
 ### 🤖 **Intelligent AI Assistant**
 - **Smart Responses**: JARVIS understands context and responds meaningfully to your entries
@@ -34,6 +37,7 @@ JARVIS AI Diary is a smart diary application that understands your voice, respon
 2. **Text Writing** - Type your entries directly with optional voice input
 3. **Memory Analysis** - Deep psychological analysis of your thoughts and patterns
 4. **Quick Notes** - Fast entry system for brief thoughts
+![Screenshot 2025-06-18 220351](https://github.com/user-attachments/assets/e93cf436-b43c-4f08-b21d-5b3f25a9da60)
 
 ### 🎛️ **Voice Settings Panel**
 - **Gender Selection**: Choose between male and female AI voices
@@ -55,6 +59,8 @@ JARVIS AI Diary is a smart diary application that understands your voice, respon
 - **Plain Text**: Simple text files for easy sharing
 - **Date Filtering**: Export specific time periods
 - **Custom Selection**: Choose which types of entries to include
+
+![Screenshot 2025-06-18 220501](https://github.com/user-attachments/assets/465022e4-7b56-4c3b-851f-79389c13d7a3)
 
 ## �️ **How to Navigate the Interface**
 
@@ -92,11 +98,15 @@ The JARVIS interface uses a futuristic design inspired by sci-fi movies, but don
 - **Entry Types**: Include only the types of entries you want
 - **Download**: Get your diary data as a file on your computer
 
+![Screenshot 2025-06-18 220501](https://github.com/user-attachments/assets/036f9f49-4d6f-49d5-843b-6272f23591ce)
+
 ### **Bio & Settings Interface (Customize JARVIS)**
 - **Personal Profile**: Tell JARVIS about yourself for better responses
 - **Voice Settings**: Choose voice gender, speed, and volume
 - **AI Personality**: Customize how JARVIS talks and behaves
 - **Test Features**: Try voice settings before saving
+![Screenshot 2025-06-18 220633](https://github.com/user-attachments/assets/c9d5fbd4-0a6e-437b-aeed-119b0777751e)
+![Screenshot 2025-06-18 220716](https://github.com/user-attachments/assets/3870f091-4131-4d59-8353-bc6280c18bc0)
 
 ## 🚀 **Complete Installation Guide**
 
