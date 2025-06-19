@@ -75,31 +75,147 @@ class AIAssistant:
         self.conversation_history = []
         self.profile_manager = UserProfileManager()
         
-    def get_openrouter_response(self, messages, max_tokens=500, temperature=0.7):
+        # Multiple API providers with fallback models
+        self.api_providers = [
+            # OpenRouter models (first priority)
+            {
+                'name': 'OpenRouter',
+                'api_key': openrouter_api_key,
+                'models': [
+                    "openai/gpt-4-turbo",
+                    "openai/gpt-3.5-turbo",
+                    "anthropic/claude-3.5-sonnet",
+                    "anthropic/claude-3-haiku",
+                    "google/gemini-pro",
+                    "meta-llama/llama-3.1-8b-instruct",
+                    "microsoft/wizardlm-2-8x22b",
+                    "mistralai/mixtral-8x7b-instruct"
+                ]
+            }
+        ]
+        
+        # Add direct OpenAI if API key is available
+        openai_key = os.getenv('OPENAI_API_KEY')
+        if openai_key:
+            self.api_providers.append({
+                'name': 'OpenAI',
+                'api_key': openai_key,
+                'models': ["gpt-4", "gpt-3.5-turbo"]
+            })
+        
+        # Add direct Anthropic if API key is available
+        anthropic_key = os.getenv('ANTHROPIC_API_KEY')
+        if anthropic_key:
+            self.api_providers.append({
+                'name': 'Anthropic',
+                'api_key': anthropic_key,
+                'models': ["claude-3-sonnet-20240229", "claude-3-haiku-20240307"]
+            })
+    
+    def get_openai_response(self, messages, model, api_key, max_tokens=500, temperature=0.7):
+        """Get response from OpenAI API directly"""
+        url = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"].strip()
+    
+    def get_anthropic_response(self, messages, model, api_key, max_tokens=500, temperature=0.7):
+        """Get response from Anthropic API directly"""
+        url = "https://api.anthropic.com/v1/messages"
+        headers = {
+            "x-api-key": api_key,
+            "Content-Type": "application/json",
+            "anthropic-version": "2023-06-01"
+        }
+        
+        # Convert messages format for Anthropic
+        system_messages = [msg["content"] for msg in messages if msg["role"] == "system"]
+        user_messages = [msg for msg in messages if msg["role"] in ["user", "assistant"]]
+        
+        payload = {
+            "model": model,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "system": " ".join(system_messages) if system_messages else "",
+            "messages": user_messages
+        }
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        return response.json()["content"][0]["text"].strip()
+    
+    def get_openrouter_response(self, messages, model, api_key, max_tokens=500, temperature=0.7):
         """Get response from OpenRouter API"""
         url = "https://openrouter.ai/api/v1/chat/completions"
         headers = {
-            "Authorization": f"Bearer {self.openrouter_api_key}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
-        last_error = None
-        for model in self.openrouter_models:
-            payload = {
-                "model": model,
-                "messages": messages,
-                "max_tokens": max_tokens,
-                "temperature": temperature
-            }
-            try:
-                response = requests.post(url, headers=headers, json=payload, timeout=30)
-                response.raise_for_status()
-                return response.json()["choices"][0]["message"]["content"].strip()
-            except Exception as e:
-                logger.warning(f"Model {model} failed: {e}")
-                last_error = e
-        # If all models fail
-        logger.error(f"All OpenRouter models failed: {last_error}")
-        return "Sorry, all AI models are currently unavailable. Please try again later."
+        payload = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"].strip()
+    
+    def get_ai_response_with_fallback(self, messages, max_tokens=500, temperature=0.7):
+        """Try multiple AI providers and models with fallback"""
+        total_attempts = 0
+        failed_attempts = []
+        
+        for provider in self.api_providers:
+            if not provider['api_key']:
+                continue
+                
+            for model in provider['models']:
+                total_attempts += 1
+                try:
+                    logger.info(f"Trying {provider['name']} with model {model}")
+                    
+                    if provider['name'] == 'OpenRouter':
+                        response = self.get_openrouter_response(
+                            messages, model, provider['api_key'], max_tokens, temperature
+                        )
+                    elif provider['name'] == 'OpenAI':
+                        response = self.get_openai_response(
+                            messages, model, provider['api_key'], max_tokens, temperature
+                        )
+                    elif provider['name'] == 'Anthropic':
+                        response = self.get_anthropic_response(
+                            messages, model, provider['api_key'], max_tokens, temperature
+                        )
+                    else:
+                        continue
+                    
+                    logger.info(f"✅ Success with {provider['name']} - {model}")
+                    return response
+                    
+                except Exception as e:
+                    error_msg = str(e)
+                    failed_attempts.append(f"{provider['name']}/{model}: {error_msg}")
+                    logger.warning(f"❌ {provider['name']} - {model} failed: {error_msg}")
+                    
+                    # If rate limited, wait a bit before trying next model
+                    if "rate_limit" in error_msg.lower() or "429" in error_msg:
+                        import time
+                        time.sleep(2)
+                    
+                    continue
+          # All attempts failed
+        logger.error(f"All {total_attempts} AI models failed. Failed attempts: {failed_attempts}")
+        return None
     
     def get_personality_prompt(self):
         """Get the current personality prompt from user profile"""
@@ -137,12 +253,23 @@ class AIAssistant:
                 {"role": "system", "content": f"Context: {conversation_context}"},
                 {"role": "user", "content": user_input}
             ]
-            response = self.get_openrouter_response(
+            
+            # Try multiple AI providers with fallback
+            response = self.get_ai_response_with_fallback(
                 messages,
                 max_tokens=150 if is_voice else 500,
                 temperature=0.7
             )
-            return response
+            
+            if response:
+                return response
+            else:
+                # All AI models failed - return helpful fallback message
+                if is_voice:
+                    return "I apologize, but I'm experiencing technical difficulties with all AI systems. Your thoughts are important, and I encourage you to continue sharing. I'll analyze your entries once systems are restored."
+                else:
+                    return "I'm currently experiencing technical difficulties with all AI providers. Your entry has been saved successfully, and I'll provide analysis once AI systems are available again. Thank you for your patience."
+                    
         except Exception as e:
             logger.error(f"AI response error: {e}")
             if is_voice:
@@ -169,12 +296,19 @@ class AIAssistant:
                 {"role": "system", "content": f"{personality_with_name} User context: {user_bio}"},
                 {"role": "user", "content": prompt}
             ]
-            response = self.get_openrouter_response(
+            
+            # Try multiple AI providers with fallback
+            response = self.get_ai_response_with_fallback(
                 messages,
                 max_tokens=300,
                 temperature=0.6
             )
-            return response
+            
+            if response:
+                return response
+            else:
+                return "Analysis temporarily unavailable due to AI system issues. Your entry has been saved successfully and will be analyzed once systems are restored."
+                
         except Exception as e:
             logger.error(f"Analysis error: {e}")
             return "Analysis temporarily unavailable. Your entry has been saved successfully."

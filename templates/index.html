@@ -1011,12 +1011,17 @@
             <span>Bio & Prompts</span>
         </a>
     </div>    <script>
-        // Session tracking for greetings
+        // Session tracking for greetings with more robust detection
         let sessionGreetingGiven = sessionStorage.getItem('jarvis_greeting_given') === 'true';
+        let greetingInProgress = false;
 
         // Add greeting when page loads (only once per session)
         window.addEventListener('load', async () => {
-            if (!sessionGreetingGiven) {
+            // Additional check to prevent multiple simultaneous requests
+            if (!sessionGreetingGiven && !greetingInProgress) {
+                greetingInProgress = true;
+                console.log('Attempting to play startup greeting...');
+                
                 try {
                     // Send startup greeting
                     const response = await fetch('/speak-greeting', {
@@ -1038,9 +1043,16 @@
                     }
                 } catch (error) {
                     console.error('Error playing startup greeting:', error);
+                } finally {
+                    greetingInProgress = false;
                 }
             } else {
-                console.log('Greeting already given in this session');
+                if (sessionGreetingGiven) {
+                    console.log('Greeting already given in this session');
+                }
+                if (greetingInProgress) {
+                    console.log('Greeting already in progress');
+                }
             }
         });
 

@@ -130,22 +130,27 @@ class AudioProcessor:
         Windows:
         1. Download from https://ffmpeg.org/download.html
         2. Extract to a folder (e.g., C:\\ffmpeg)
-        3. Add C:\\ffmpeg\\bin to your system PATH          Or use chocolatey: choco install ffmpeg
-        Or use winget: winget install FFmpeg        """
+        3. Add C:\\ffmpeg\\bin to your system PATH          Or use chocolatey: choco install ffmpeg        Or use winget: winget install FFmpeg        """
     
     def speak_text(self, text):
         """Convert text to speech with masculine robotic voice - thread safe"""
         if not self.tts_available or not self.tts_engine:
             logger.warning("TTS not available")
-            return False
-        
+            return False        
         # Check if already speaking
         if self.is_speaking:
             logger.info("Speech in progress, skipping overlapping request")
             return False
         
+        logger.info(f"Starting TTS for text: '{text[:50]}...'")
+        
+        # Add text debugging
+        if not self.add_tts_text_debug(text, "speak_text"):
+            return False
+        
         with self.speech_lock:
             if self.is_speaking:  # Double-check inside lock
+                logger.info("Speech already in progress after lock")
                 return False
             
             self.is_speaking = True
@@ -156,7 +161,10 @@ class AudioProcessor:
                 
                 # Skip empty text
                 if not clean_text.strip():
+                    logger.info("Empty text, skipping TTS")
                     return True
+                
+                logger.info(f"Clean text for TTS: '{clean_text}'")
                 
                 # Optimize TTS settings for masculine robotic voice
                 self.tts_engine.setProperty('rate', 130)  # Slower for authoritative delivery
@@ -180,23 +188,74 @@ class AudioProcessor:
                     
                     if masculine_voice:
                         self.tts_engine.setProperty('voice', masculine_voice.id)
-                
+                        logger.info(f"Using voice: {masculine_voice.name}")                
                 # Generate speech with authoritative timing
                 # Use try-catch specifically for pyttsx3 operations
                 try:
+                    logger.info("Starting TTS engine say and runAndWait")
                     self.tts_engine.say(clean_text)
-                    self.tts_engine.runAndWait()
+                    
+                    # Add timeout mechanism for runAndWait to prevent hanging
+                    import threading
+                    import time
+                    
+                    tts_completed = threading.Event()
+                    tts_error_occurred = None
+                    
+                    def run_tts():
+                        nonlocal tts_error_occurred
+                        try:
+                            self.tts_engine.runAndWait()
+                            tts_completed.set()
+                        except Exception as e:
+                            tts_error_occurred = e
+                            tts_completed.set()
+                    
+                    tts_thread = threading.Thread(target=run_tts, daemon=True)
+                    tts_thread.start()
+                      # Wait for TTS to complete with 10 second timeout
+                    if tts_completed.wait(timeout=10.0):
+                        if tts_error_occurred:
+                            raise tts_error_occurred
+                        logger.info("TTS engine completed successfully")
+                    else:
+                        logger.error("TTS engine timed out after 10 seconds")
+                        # Force stop the TTS engine and reset state
+                        try:
+                            self.tts_engine.stop()
+                        except:
+                            pass
+                        # Try backup TTS method
+                        logger.info("Attempting backup TTS methods...")
+                        if self.speak_text_sapi_backup(clean_text):
+                            return True
+                        elif self.speak_text_powershell_backup(clean_text):
+                            return True
+                        else:
+                            logger.error("All TTS methods failed")
+                            return False
+                        
                 except Exception as tts_error:
                     logger.error(f"TTS engine error: {tts_error}")
-                    # Try to reinitialize the engine if it fails
-                    if "runAndWait" in str(tts_error):
-                        logger.info("Attempting to reinitialize TTS engine...")
-                        self.tts_available = self._init_tts()
-                    return False
+                    # Try to stop the engine and reset state
+                    try:
+                        self.tts_engine.stop()
+                    except:
+                        pass
+                    # Try backup TTS method
+                    logger.info("Attempting backup TTS methods...")
+                    if self.speak_text_sapi_backup(clean_text):
+                        return True
+                    elif self.speak_text_powershell_backup(clean_text):
+                        return True
+                    else:
+                        logger.error("All TTS methods failed")
+                        return False
                 
                 # Add a small delay to ensure audio completes
                 time.sleep(0.3)  # Reduced delay for better responsiveness
                 
+                logger.info("TTS completed successfully")
                 return True
             except Exception as e:
                 logger.error(f"TTS error: {e}")
@@ -377,27 +436,35 @@ class AudioProcessor:
                 if selected_voice:
                     self.tts_engine.setProperty('voice', selected_voice.id)
                     logger.info(f"Voice configured: {selected_voice.name}, Speed: {speed_clamped}, Volume: {volume}%")
-                else:
-                    # Use first available voice as fallback
+                else:                    # Use first available voice as fallback
                     self.tts_engine.setProperty('voice', voices[0].id)
                     logger.info(f"Voice fallback: {voices[0].name}, Speed: {speed_clamped}, Volume: {volume}%")
-            
             return True
         except Exception as e:
             logger.error(f"Voice configuration error: {e}")
             return False
-    
+
     def speak_text_with_settings(self, text, gender="male", speed=150, volume=100):
         """Speak text with custom voice settings - thread safe"""
         if not self.tts_available or not self.tts_engine:
             logger.warning("TTS not available")
             return False
         
-        # Check if already speaking
-        if self.is_speaking:
-            logger.info("Speech in progress, skipping overlapping request")
-            return False
+        # For important AI responses, wait briefly if speech is in progress rather than skipping
+        import time
+        max_wait_time = 3.0  # Maximum time to wait for current speech to finish
+        wait_interval = 0.1
+        waited_time = 0
         
+        while self.is_speaking and waited_time < max_wait_time:
+            logger.info(f"Waiting for current speech to finish... ({waited_time:.1f}s)")
+            time.sleep(wait_interval)
+            waited_time += wait_interval
+        
+        # If still speaking after wait time, skip this request
+        if self.is_speaking:
+            logger.warning("Speech still in progress after waiting, skipping AI response")
+            return False        
         with self.speech_lock:
             if self.is_speaking:  # Double-check inside lock
                 return False
@@ -405,6 +472,12 @@ class AudioProcessor:
             self.is_speaking = True
             
             try:
+                logger.info(f"Starting AI response TTS with settings: gender={gender}, speed={speed}, volume={volume}")
+                
+                # Add text debugging
+                if not self.add_tts_text_debug(text, f"AI_response_{gender}_{speed}_{volume}"):
+                    return False
+                
                 # Configure voice with custom settings
                 if not self.configure_voice_settings(gender, speed, volume):
                     return False
@@ -416,17 +489,66 @@ class AudioProcessor:
                 if not clean_text.strip():
                     return True
                 
-                # Generate speech with error handling
+                logger.info(f"Speaking AI response: '{clean_text[:100]}...'")
+                
+                # Generate speech with error handling and timeout
                 try:
                     self.tts_engine.say(clean_text)
-                    self.tts_engine.runAndWait()
+                    
+                    # Add timeout mechanism for runAndWait to prevent hanging
+                    import threading
+                    
+                    tts_completed = threading.Event()
+                    tts_error_occurred = None
+                    
+                    def run_tts():
+                        nonlocal tts_error_occurred
+                        try:
+                            self.tts_engine.runAndWait()
+                            tts_completed.set()
+                        except Exception as e:
+                            tts_error_occurred = e
+                            tts_completed.set()
+                    
+                    tts_thread = threading.Thread(target=run_tts, daemon=True)
+                    tts_thread.start()                    # Wait for TTS to complete with 10 second timeout
+                    if tts_completed.wait(timeout=10.0):
+                        if tts_error_occurred:
+                            raise tts_error_occurred
+                        logger.info("AI response TTS completed successfully")
+                    else:
+                        logger.error("AI response TTS timed out after 10 seconds")
+                        # Force stop the TTS engine
+                        try:
+                            self.tts_engine.stop()
+                        except:
+                            pass
+                        # Try backup TTS method
+                        logger.info("Attempting backup TTS for AI response...")
+                        if self.speak_text_sapi_backup(clean_text):
+                            return True
+                        elif self.speak_text_powershell_backup(clean_text):
+                            return True
+                        else:
+                            logger.error("All AI response TTS methods failed")
+                            return False
+                        
                 except Exception as tts_error:
                     logger.error(f"TTS engine error with settings: {tts_error}")
-                    # Try to reinitialize the engine if it fails
-                    if "runAndWait" in str(tts_error):
-                        logger.info("Attempting to reinitialize TTS engine...")
-                        self.tts_available = self._init_tts()
-                    return False
+                    # Try to stop the engine
+                    try:
+                        self.tts_engine.stop()
+                    except:
+                        pass
+                    # Try backup TTS method
+                    logger.info("Attempting backup TTS for AI response...")
+                    if self.speak_text_sapi_backup(clean_text):
+                        return True
+                    elif self.speak_text_powershell_backup(clean_text):
+                        return True
+                    else:
+                        logger.error("All AI response TTS methods failed")
+                        return False
                 
                 # Add a small delay to ensure audio completes
                 time.sleep(0.3)
@@ -461,3 +583,82 @@ class AudioProcessor:
         except Exception as e:
             logger.error(f"Error getting available voices: {e}")
             return []
+    
+    def force_reset_tts_state(self):
+        """Force reset TTS state when it gets stuck"""
+        logger.warning("Force resetting TTS state")
+        with self.speech_lock:
+            self.is_speaking = False
+            try:
+                if self.tts_engine:
+                    self.tts_engine.stop()
+            except Exception as e:
+                logger.warning(f"Error stopping TTS engine during reset: {e}")
+            
+            # Reinitialize TTS engine
+            self.tts_available = self._init_tts()
+            logger.info("TTS state reset completed")
+
+    def add_tts_text_debug(self, text, context=""):
+        """Add text debugging to help identify TTS issues"""
+        logger.info(f"TTS DEBUG [{context}]: Text to speak: '{text[:200]}...' (Length: {len(text)} chars)")
+        if not text.strip():
+            logger.warning(f"TTS DEBUG [{context}]: Empty text provided")
+            return False
+        return True
+
+    def speak_text_sapi_backup(self, text):
+        """Backup TTS method using Windows SAPI directly"""
+        try:
+            import win32com.client
+            
+            logger.info(f"Using SAPI backup TTS for: '{text[:50]}...'")
+            
+            speaker = win32com.client.Dispatch("SAPI.SpVoice")
+            
+            # Set voice to masculine if available
+            voices = speaker.GetVoices()
+            for i in range(voices.Count):
+                voice = voices.Item(i)
+                voice_name = voice.GetDescription().lower()
+                if any(male in voice_name for male in ['david', 'mark', 'male', 'man']):
+                    speaker.Voice = voice
+                    logger.info(f"SAPI backup using voice: {voice.GetDescription()}")
+                    break
+            
+            # Speak the text (this method doesn't hang)
+            speaker.Speak(text)
+            logger.info("SAPI backup TTS completed successfully")
+            return True
+            
+        except ImportError:
+            logger.error("win32com not available for SAPI backup")
+            return False
+        except Exception as e:
+            logger.error(f"SAPI backup TTS error: {e}")
+            return False
+
+    def speak_text_powershell_backup(self, text):
+        """Backup TTS method using PowerShell"""
+        try:
+            import subprocess
+            
+            logger.info(f"Using PowerShell backup TTS for: '{text[:50]}...'")
+            
+            # Escape single quotes in text
+            safe_text = text.replace("'", "''")
+            
+            cmd = f'powershell -Command "Add-Type -AssemblyName System.Speech; $speak = New-Object System.Speech.Synthesis.SpeechSynthesizer; $speak.Speak(\'{safe_text}\')"'
+            
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=15)
+            
+            if result.returncode == 0:
+                logger.info("PowerShell backup TTS completed successfully")
+                return True
+            else:
+                logger.error(f"PowerShell backup TTS failed: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"PowerShell backup TTS error: {e}")
+            return False

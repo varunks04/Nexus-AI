@@ -3,9 +3,10 @@ Flask Routes Module
 Contains all Flask route definitions organized by functionality
 """
 
-from flask import render_template, request, jsonify, redirect, url_for, send_file, flash
+from flask import render_template, request, jsonify, redirect, url_for, send_file, flash, session
 import logging
 import datetime
+import time
 import os
 import tempfile
 import uuid
@@ -68,8 +69,7 @@ class RouteManager:
         self.app.add_url_rule('/delete-entry/<entry_id>', 'delete_entry_api', self.delete_entry_api, methods=['DELETE'])
         self.app.add_url_rule('/edit-entry/<entry_id>', 'edit_entry', self.edit_entry, methods=['GET'])
         self.app.add_url_rule('/update-profile', 'update_profile', self.update_profile, methods=['POST'])
-        
-        # Error handlers
+          # Error handlers
         self.app.errorhandler(404)(self.not_found_error)
         self.app.errorhandler(500)(self.internal_error)
     
@@ -81,6 +81,18 @@ class RouteManager:
             greeting_type = data.get('type', 'general')
             user_name = data.get('user_name', '')
             
+            # Server-side session tracking to prevent duplicate greetings
+            session_key = f'greeting_{greeting_type}_given'
+            if session.get(session_key, False):
+                logger.info(f"Greeting type '{greeting_type}' already given in this session")
+                return jsonify({
+                    'success': True,
+                    'greeting': f"Session greeting already provided",
+                    'voice_generated': False,  # Don't speak again
+                    'timestamp': datetime.datetime.now().isoformat(),
+                    'reason': 'already_given_in_session'
+                })
+            
             # Get current time for contextual greeting
             current_hour = datetime.datetime.now().hour
             
@@ -90,7 +102,8 @@ class RouteManager:
                 time_greeting = "Good afternoon"
             else:
                 time_greeting = "Good evening"
-              # Create personalized greeting based on type
+            
+            # Create personalized greeting based on type
             if greeting_type == 'startup':
                 greeting = f"{time_greeting}! JARVIS neural interface is now online and ready for voice interaction. How may I assist you today?"
             elif greeting_type == 'neural_record':
@@ -113,7 +126,11 @@ class RouteManager:
             if user_name:
                 greeting = greeting.replace("!", f", {user_name}!")
             
-            # Generate voice output
+            # Mark this greeting type as given in the session
+            session[session_key] = True
+            logger.info(f"Giving greeting type '{greeting_type}': {greeting}")
+            
+            # Generate voice output using backup TTS system
             voice_success = self.audio_processor.speak_text(greeting)
             
             return jsonify({
@@ -121,8 +138,7 @@ class RouteManager:
                 'greeting': greeting,
                 'voice_generated': voice_success,
                 'timestamp': datetime.datetime.now().isoformat()
-            })
-            
+            })            
         except Exception as e:
             logger.error(f"Greeting generation error: {e}")
             return jsonify({
@@ -137,6 +153,30 @@ class RouteManager:
             status_type = data.get('type', '')
             success = data.get('success', True)
             details = data.get('details', {})
+            
+            # Check session to avoid repetitive status messages
+            session_key = f'status_{status_type}_spoken'
+            last_spoken = session.get(session_key, 0)
+            current_time = time.time()
+            
+            # Cooldown periods for different status types (in seconds)
+            cooldown_periods = {
+                'voice_processing': 10,  # 10 seconds between voice processing status
+                'save_entry': 30,        # 30 seconds between save confirmations
+                'system_ready': 300,     # 5 minutes between system ready messages
+                'profile_update': 60,    # 1 minute between profile updates
+                'conversation_end': 5,   # 5 seconds between conversation ends
+                'default': 15            # Default cooldown for other statuses
+            }
+            
+            cooldown = cooldown_periods.get(status_type, cooldown_periods['default'])
+            
+            # Skip speaking if within cooldown period
+            should_speak = (current_time - last_spoken) > cooldown
+            
+            # Silent status types that should never speak unless explicitly requested
+            silent_status_types = ['voice_processing', 'conversation_end']
+            force_silent = status_type in silent_status_types and not details.get('force_speak', False)
             
             # Generate appropriate status message based on type and success
             if status_type == 'export':
@@ -217,20 +257,28 @@ class RouteManager:
                     message = f"Operation completed successfully!"
                 else:
                     message = f"Operation failed. Please try again."
-            
-            # Add additional details if provided
+              # Add additional details if provided
             additional_info = details.get('additional_info', '')
             if additional_info:
                 message += f" {additional_info}"
             
-            # Generate voice output
-            voice_success = self.audio_processor.speak_text(message)
+            # Determine if we should speak this status message
+            voice_success = False
+            if not force_silent and should_speak:
+                # Update the last spoken time for this status type
+                session[session_key] = current_time
+                # Generate voice output
+                voice_success = self.audio_processor.speak_text(message)
+                logger.info(f"Status message spoken: {status_type} - {message[:50]}...")
+            else:
+                logger.info(f"Status message silenced: {status_type} (cooldown: {not should_speak}, forced: {force_silent})")
             
             return jsonify({
                 'success': True,
                 'message': message,
                 'voice_generated': voice_success,
                 'status_type': status_type,
+                'silenced': force_silent or not should_speak,
                 'timestamp': datetime.datetime.now().isoformat()
             })
             
@@ -432,13 +480,25 @@ class RouteManager:
                     
             except Exception as save_error:
                 logger.error(f"Save error: {save_error}")
-            
-            # Generate voice response (optional)
+              # Generate voice response with user settings
             voice_generated = False
             try:
-                voice_generated = self.audio_processor.speak_text(ai_response)
+                voice_settings = self._get_voice_settings()
+                voice_generated = self.audio_processor.speak_text_with_settings(
+                    ai_response,
+                    voice_settings['gender'], 
+                    voice_settings['speed'], 
+                    voice_settings['volume']
+                )
+                logger.info(f"Audio response voice generated with settings {voice_settings}: {voice_generated}")
             except Exception as tts_error:
-                logger.error(f"TTS error: {tts_error}")
+                logger.error(f"TTS error in audio processing: {tts_error}")
+                # Fallback to basic speak_text
+                try:
+                    voice_generated = self.audio_processor.speak_text(ai_response)
+                    logger.info(f"Audio response voice fallback: {voice_generated}")
+                except Exception as fallback_error:
+                    logger.error(f"Audio response voice fallback error: {fallback_error}")
             
             return jsonify({
                 'status': 'success',
@@ -575,14 +635,25 @@ class RouteManager:
             except Exception as ai_error:
                 logger.error(f"AI response error: {ai_error}")
                 ai_response = "Thank you for sharing your thoughts. Your entry has been analyzed and saved successfully."
-            
-            # Step 3: Generate voice feedback FIRST
+              # Step 3: Generate voice feedback with user settings
             voice_success = False
             try:
-                voice_success = self.audio_processor.speak_text(ai_response)
-                logger.info(f"Voice feedback generated: {voice_success}")
+                voice_settings = self._get_voice_settings()
+                voice_success = self.audio_processor.speak_text_with_settings(
+                    ai_response, 
+                    voice_settings['gender'], 
+                    voice_settings['speed'], 
+                    voice_settings['volume']
+                )
+                logger.info(f"Voice feedback generated with settings {voice_settings}: {voice_success}")
             except Exception as voice_error:
                 logger.error(f"Voice generation error: {voice_error}")
+                # Fallback to basic speak_text if settings fail
+                try:
+                    voice_success = self.audio_processor.speak_text(ai_response)
+                    logger.info(f"Voice feedback fallback: {voice_success}")
+                except Exception as fallback_error:
+                    logger.error(f"Voice fallback error: {fallback_error}")
             
             # Step 4: Save entry to diary ONLY AFTER voice feedback
             try:
@@ -993,3 +1064,32 @@ class RouteManager:
                 'voices': [],
                 'current_settings': {'gender': 'male', 'speed': 150, 'volume': 100}
             }), 500
+
+    def _get_voice_settings(self):
+        """Get current voice settings from user profile"""
+        try:
+            profile = self.diary_manager.load_user_profile()
+            voice_settings = profile.get('voice_settings', {})
+            return {
+                'gender': voice_settings.get('gender', 'male'),
+                'speed': voice_settings.get('speed', 150),
+                'volume': voice_settings.get('volume', 100)
+            }
+        except Exception as e:
+            logger.warning(f"Could not load voice settings: {e}")
+            return {'gender': 'male', 'speed': 150, 'volume': 100}
+
+    def reset_tts(self):
+        """Reset TTS state when it gets stuck"""
+        try:
+            self.audio_processor.force_reset_tts_state()
+            return jsonify({
+                'status': 'success',
+                'message': 'TTS state reset successfully'
+            })
+        except Exception as e:
+            logger.error(f"Error resetting TTS: {e}")
+            return jsonify({
+                'status': 'error',
+                'message': f'Failed to reset TTS: {str(e)}'
+            })
